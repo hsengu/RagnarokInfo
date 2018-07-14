@@ -1,7 +1,7 @@
 ﻿// Project: MainWindow.xaml.cs
 // Description: Interaction logic for the main window of RagnarokInfo
 // Coded and owned by: Hok Uy
-// Last Source Update: 6 May 2017 at 19:17
+// Last Source Update: 1 December 2017 at 12:57
 
 using System;
 using System.Windows;
@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Xml.Serialization;
+using System.Collections.ObjectModel;
 
 namespace RagnarokInfo
 {
@@ -35,8 +36,10 @@ namespace RagnarokInfo
                                                         int nSize, out int lpNumberOfBytesRead);
         }
         #endregion Winapi
+
         private static int clientSelect;
         private static Process[] ragList;
+        private static ObservableCollection<string> Items = new ObservableCollection<string>();
         private static IntPtr hProcess, whProcess;
         private static String name_initial;
         private static int b_actual = 0, j_actual = 0,
@@ -65,6 +68,7 @@ namespace RagnarokInfo
         public MainWindow(int cSelect)
         {
             InitializeComponent();
+            Char_Combo.ItemsSource = Items;
             clientSelect = cSelect;
             getProcesses(clientSelect);
             ReadInfo(true);
@@ -75,7 +79,7 @@ namespace RagnarokInfo
             petInfo.Visibility = Visibility.Hidden;
             settings.Visibility = Visibility.Hidden;
             timer.Tick += dispatcherTimer_Tick;
-            timer.Interval = TimeSpan.FromMilliseconds(100);
+            timer.Interval = TimeSpan.FromMilliseconds(10);
             timer.Start();
             listUpdateTimer.Tick += listUpdate_Tick;
             listUpdateTimer.Interval = TimeSpan.FromSeconds(10);
@@ -141,7 +145,7 @@ namespace RagnarokInfo
 
             if (logged_in)
             {
-                this.Title = "ROinfo " + client + "     " + getTime();
+                this.Title = "ROinfo " + client + "     Lvl: " + b_lvl_init + "/" + j_lvl_init + "     " + getTime();
                 Char_Name.Content = name_initial;
                 label.Content = b_actual.ToString("N0") + " exp";
                 label4.Content = j_actual.ToString("N0") + " exp";
@@ -196,7 +200,7 @@ namespace RagnarokInfo
             System.Windows.MessageBox.Show("If you paid for this, you got scammed!.\n"
                                                + "Please do not redistribute without my permission!\n"
                                                + "ROinfo is coded by Hok Uy\n"
-                                               + "© 2017");
+                                               + "© 2017 Build: 20171202");
         }
 
         private void ReadInfo(bool init)
@@ -357,16 +361,19 @@ namespace RagnarokInfo
             try
             {
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Name, 16), nBuff, nBuff.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].BaseExp, 16), bBuff, bBuff.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].JobExp, 16), jBuff, jBuff.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].BaseLvl, 16), bLvl, bLvl.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].JobLvl, 16), jLvl, jLvl.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].BaseRequired, 16), bReq, bReq.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].JobRequired, 16), jReq, jReq.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 20, bBuff, bBuff.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 32, jBuff, jBuff.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 36, bLvl, bLvl.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 44, jLvl, jLvl.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 24, bReq, bReq.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 28, jReq, jReq.Length, out r);
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].LoggedIn, 16), logged, logged.Length, out r);
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16), acct, acct.Length, out r);
             }
-            catch(Exception e) { System.Windows.MessageBox.Show("An exception was thrown because:\n" + e.Message + "\nProgram will now terminate."); }
+            catch(Exception e) {
+                System.Windows.MessageBox.Show("An exception was thrown because:\n" + e.Message + "\nProgram will now terminate.");
+                Application.Current.Shutdown();
+            }
         }
 
         private void clearMem()
@@ -378,14 +385,17 @@ namespace RagnarokInfo
             try
             {
                 UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Name, 16), clear_string, clear_string.Length, out r);
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].BaseExp, 16), clear, clear.Length, out r);
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].JobExp, 16), clear, clear.Length, out r);
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].BaseLvl, 16), clear, clear.Length, out r);
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].JobLvl, 16), clear, clear.Length, out r);
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].BaseRequired, 16), clear, clear.Length, out r);
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].JobRequired, 16), clear, clear.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 20, clear, clear.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 32, clear, clear.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 36, clear, clear.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 44, clear, clear.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 24, clear, clear.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 28, clear, clear.Length, out r);
             }
-            catch(Exception e) { System.Windows.MessageBox.Show("An exception was thrown because:\n" + e.Message + "\nProgram will now terminate."); }
+            catch(Exception e) {
+                System.Windows.MessageBox.Show("An exception was thrown because:\n" + e.Message + "\nProgram will now terminate.");
+                Application.Current.Shutdown();
+            }
         }
 
         private void makeList()
@@ -395,15 +405,15 @@ namespace RagnarokInfo
             IntPtr tempProcess = hProcess;
 
             Char_Combo.SelectionChanged -= Char_Combo_SelectionChanged;
-            Char_Combo.Items.Clear();
+            Items.Clear();
             try
             {
                 for (int i = 0; i < ragList.Length; i++)
                 {
                     hProcess = UnsafeNativeMethods.OpenProcess(0x0010, false, ragList[i].Id);
                     UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Name, 16), charName, charName.Length, out read);
-                    Char_Combo.Items.Add(System.Text.Encoding.ASCII.GetString(charName).Trim('\0'));
-                    if (Char_Combo.Items.GetItemAt(i).ToString() == name_initial )
+                    Items.Add(System.Text.Encoding.ASCII.GetString(charName).Trim('\0'));
+                    if (Items[i].ToString() == name_initial)
                         newIndex = i;
                 }
             }

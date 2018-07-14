@@ -1,8 +1,7 @@
 ﻿// Project: PetInfo.xaml.cs
 // Description: Interaction logic for the PetInfo window of RagnarokInfo
 // Coded and owned by: Hok Uy
-// Last Source Update: 6 May 2017 at 13:01
-
+// Last Source Update: 1 December 2017 at 12:57
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,10 +16,9 @@ namespace RagnarokInfo
     /// </summary>
     public partial class PetInfo : Window
     {
+        #region Winapi
         internal static class UnsafeNativeMethods
         {
-            #region Winapi
-
             [DllImport("Kernel32.dll")]
             public static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle,
                                                     int dwProcessId);
@@ -28,9 +26,8 @@ namespace RagnarokInfo
             [DllImport("Kernel32.dll")]
             public static extern bool ReadProcessMemory(IntPtr hProcess, uint lpBaseAddress, byte[] lpBuffer,
                                                         int nSize, out int lpNumberOfBytesRead);
-
-            #endregion Winapi
         }
+        #endregion Winapi
 
         public class Sound : IDisposable
         {
@@ -103,11 +100,11 @@ namespace RagnarokInfo
             getPetInfo();
             outputToForm();
 
-            if (homu_hun == 100 && setBeepThresholdH == false)
+            if (setBeepThresholdH)
             {
-                setBeepThresholdH = true;
                 setBeepH();
             }
+
             if (pet_hun == 100 && setBeepThresholdP == false)
             {
                 setBeepThresholdH = true;
@@ -173,19 +170,20 @@ namespace RagnarokInfo
             try
             {
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].HomuName, 16), hnBuff, hnBuff.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].HomuLoyalty, 16), hLoy, hLoy.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].HomuHunger, 16), hHun, hHun.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].HomuExp, 16), hExp, hExp.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].HomuRequired, 16), hExpNeed, hExpNeed.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].HomuOut, 16), hOutB, hOutB.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].HomuName, 16) + 88, hLoy, hLoy.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].HomuName, 16) + 104, hHun, hHun.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].HomuName, 16) + 96, hExp, hExp.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].HomuName, 16) + 100, hExpNeed, hExpNeed.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].HomuName, 16) + 140, hOutB, hOutB.Length, out r);
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].PetName, 16), pnBuff, pnBuff.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].PetLoyalty, 16), pLoy, pLoy.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].PetHunger, 16), pHun, pHun.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].PetOut, 16), pOutB, pOutB.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].PetName, 16) + 48, pLoy, pLoy.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].PetName, 16) + 44, pHun, pHun.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].PetName, 16) + 36, pOutB, pOutB.Length, out r);
             }
             catch (Exception e)
             {
                 System.Windows.MessageBox.Show("An exception was thrown because:\n" + e.Message + "\nProgram will now terminate.");
+                Application.Current.Shutdown();
             }
         }
 
@@ -316,6 +314,10 @@ namespace RagnarokInfo
                     if (checkBox.IsChecked == false)
                         ding.Play();
                 }
+                else if (homu_hun >= homu_beep_when && homu_hun_init != homu_beep_when)
+                    setBeepThresholdH = true;
+                else if (homu_hun > homu_hun_init && homu_hun < homu_beep_when)
+                    homu_hun_init = homu_hun;
 
                 if (pet_hun < pet_hun_init && pet_out != -1 && isLoggedIn)
                 {
