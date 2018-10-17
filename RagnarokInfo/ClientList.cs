@@ -9,11 +9,8 @@ namespace RagnarokInfo
 {
     public class ClientInfo
     {
-        public string Name { get; set; }
         public string LoggedIn { get; set; }
         public string Account { get; set; }
-        public string HomuName { get; set; }
-        public string PetName { get; set; }
     }
 
     [XmlRootAttribute("ClientList")]
