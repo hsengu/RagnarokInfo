@@ -169,12 +169,12 @@ namespace RagnarokInfo
         {
             try
             {
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 10532, hnBuff, hnBuff.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 10620, hLoy, hLoy.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 10636, hHun, hHun.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 10628, hExp, hExp.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 10632, hExpNeed, hExpNeed.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 10672, hOutB, hOutB.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 14132, hnBuff, hnBuff.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 14220, hLoy, hLoy.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 14236, hHun, hHun.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 14228, hExp, hExp.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 14232, hExpNeed, hExpNeed.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 14272, hOutB, hOutB.Length, out r);
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) - 1512, pnBuff, pnBuff.Length, out r);
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) - 1464, pLoy, pLoy.Length, out r);
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) - 1468, pHun, pHun.Length, out r);
