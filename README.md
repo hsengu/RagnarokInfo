@@ -10,7 +10,7 @@ This application is currently able to read the following information from proces
   - Current homunculus name (if out)
   - Current homunculus hunger status (if out)
 
-Given these data points this application is currently able to extrapolate:
+Given these data points this application is currently able to extrapolate in addition to the above:
   1. Calculate the amount of experience points gained.
   2. Calculate the amount of experience points gained per hour.
   3. Calculate the amount of experience points remaining to advance to the next Base/Job level.
