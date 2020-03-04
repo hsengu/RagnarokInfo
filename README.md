@@ -1,8 +1,5 @@
 # RagnarokInfo
-# Note: As of 02/01/2020 - I will no longer be maintaining this application due to the implementation of EasyAntiCheat
-# which prevents this application from using standard memory inspection methods to retrieve the necessary data for processing
-# from in-game memory. The business logic of this application is still valid; however, with no access to the data required
-# from game memory, this application is now deprecated.
+# Note: As of 02/01/2020 - I will no longer be maintaining this application due to the implementation of EasyAntiCheat which prevents this application from using standard memory inspection methods to retrieve the necessary data for processing from in-game memory. The business logic of this application is still valid; however, with no access to the data required from game memory, this application is now deprecated.
 This is a working prototype application to read Ragnarok Online game data from process memory currently is designed to function only with International Ragnarok Online.
 This application is currently able to read the following information from process memory:
   - User account ID #
