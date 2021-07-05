@@ -20,6 +20,12 @@ Given these data points this application is currently able to extrapolate in add
   5. Pause all real-time calculations if a player logs out, and will resume when the player logs back in on the same character.
   6. Supports the ability to switch viewing of multiple clients for those who 'multi-client'
   
+### Built with
+- Visual C#
+- .NET 4.5.2
+- WPF
+- FodyWeavers
+
 ### Notable features
   - Reads a single address from .XML file that is user editable and calculates offsets to memory locations of data necessary for core functionality of the software. This streamlines the memory hunting process whenever client updates are pushed by the game developer/publisher.
   - Does not use any techniques that could be leveraged to provide an unfair advantage in competitive aspects, and is mainly designed as a quality of life improvement for features missing from the base game.
