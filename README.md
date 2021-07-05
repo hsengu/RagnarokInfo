@@ -1,5 +1,5 @@
 # RagnarokInfo
-## Note: As of 02/01/2020 - I will no longer be maintaining this application regularly due to the implementation of EasyAntiCheat which prevents this application from using standard memory inspection methods to retrieve the necessary data for processing from in-game memory. The business logic of this application is still valid; however, with no access to the data required from game memory, this application will receive updates sparingly and only with large changes.
+## Note: As of 07/04/2021 - I will no longer be maintaining this application regularly due to the implementation of EasyAntiCheat which prevents this application from using standard memory inspection methods to retrieve the necessary data for processing from in-game memory. The business logic of this application is still valid; however, with no access to the data required from game memory, this application will receive updates sparingly and only with large changes. The code is functional but a single line is omitted and for the reasons stated above will not publicly provide it. I provide this for educational purposes only.
 ### Description
 This is a working prototype application to read Ragnarok Online game data from process memory currently is designed to function only with International Ragnarok Online.
 This application is currently able to read the following information from process memory:
@@ -24,7 +24,10 @@ Given these data points this application is currently able to extrapolate in add
 - Visual C#
 - .NET 4.5.2
 - WPF
-- FodyWeavers
+- Extended.Wpf.Toolkit NuGet Package
+- Fody NuGet Package
+- Costura.Fody NuGet Package
+- WindowsAPICodePack NuGet Package
 
 ### Notable features
   - Reads a single address from .XML file that is user editable and calculates offsets to memory locations of data necessary for core functionality of the software. This streamlines the memory hunting process whenever client updates are pushed by the game developer/publisher.
@@ -41,4 +44,20 @@ Given these data points this application is currently able to extrapolate in add
   3. Potentially migrate to a UWP application for Windows 10 only
 
 ### Screenshots
-Coming Soon...
+| Start Menu |
+| :--: |
+![Start Menu](./Screenshots/007.jpg)
+
+
+| Main Window |
+| :--: |
+![Running](./Screenshots/001.jpg) ![Logged Out](./Screenshots/003.jpg) 
+![Running with EXP Calc](./Screenshots/005.jpg)
+
+| Pet Window |
+| :--: |
+![Running](./Screenshots/002.jpg) ![Inactive](./Screenshots/004.jpg) 
+
+| Settings Window |
+| :--: |
+![Default](./Screenshots/006.jpg)
