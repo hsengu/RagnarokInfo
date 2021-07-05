@@ -1,10 +1,13 @@
 ﻿// Project: Settings.xaml.cs
 // Description: Interaction logic for the settings window of RagnarokInfo
 // Coded and owned by: Hok Uy
-// Last Source Update: 5 May 2017 at 16:00
+// Last Source Update: 27 May 2021
 
+using System;
 using System.Windows;
 using System.ComponentModel;
+using System.IO;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace RagnarokInfo
 {
@@ -17,16 +20,8 @@ namespace RagnarokInfo
         public Settings()
         {
             InitializeComponent();
-            switch(MainWindow.sClient)
-            {
-                default:
-                case 0: ClientName.Content = "Renewal";
-                    break;
-                case 1: ClientName.Content = "Classic";
-                    break;
-                case 2: ClientName.Content = "Sakray";
-                    break;
-            }
+            RagexeTextbox.IsReadOnly = true;
+            RagexeTextbox.Text = ClientSelect.getUserSettings().appSettings.Filepath;
         }
 
         private void OpacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -47,6 +42,36 @@ namespace RagnarokInfo
         private void Close_Click(object sender, RoutedEventArgs e)
         {
             this.Visibility = Visibility.Hidden;
+        }
+
+        private void Browse_Click(object sender, RoutedEventArgs e)
+        {
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            dialog.InitialDirectory = ClientSelect.getUserSettings().appSettings.Filepath;
+            dialog.IsFolderPicker = true;
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                RagexeTextbox.Text = dialog.FileName;
+            }
+        }
+
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+            /*
+            UserSettings temp = new UserSettings(ClientSelect.getUserSettings());
+            System.Xml.Serialization.XmlSerializer writer =
+                new System.Xml.Serialization.XmlSerializer(typeof(UserSettings));
+            var path = Directory.GetCurrentDirectory() + "//SettingsTest.xml";
+            System.IO.FileStream file = System.IO.File.Create(path);
+            writer.Serialize(file, temp);
+            file.Close();
+            */
+            System.Windows.MessageBox.Show("This isn't working yet.\nSet your path manually in Settings.xml");
+        }
+
+        public String getPath()
+        {
+            return RagexeTextbox.Text;
         }
     }
 }

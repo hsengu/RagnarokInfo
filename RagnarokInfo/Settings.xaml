@@ -10,9 +10,11 @@
         <Label x:Name="BGOpacity" Content="Background Text Opacity" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,0,0,0"/>
         <Slider x:Name="OpacitySlider" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,26,0,0" Width="152" Maximum="50" LargeChange="5" ValueChanged="OpacitySlider_ValueChanged" SmallChange="1"/>
         <Label x:Name="OpacityValue" Content="50" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="277,22,0,0"/>
-        <Label x:Name="ClientSelect" Content="Selected iRO Client" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,50,0,0"/>
+        <Label x:Name="RagexeLocation" Content="Ragexe Location" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,50,0,0"/>
         <Button x:Name="Close" Content="Close" HorizontalAlignment="Left" VerticalAlignment="Top" Width="47" Margin="261,117,0,0" Click="Close_Click"/>
-        <Label x:Name="ClientName" Content="Client Name" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,81,10,25" RenderTransformOrigin="1.093,0.769" FontSize="20" Width="295"/>
+        <TextBox x:Name="RagexeTextbox" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="237" Margin="15,76,0,0"/>
+        <Button x:Name="Browse" Content="Browse" HorizontalAlignment="Left" VerticalAlignment="Top" Width="47" Margin="257,78,0,0" Click="Browse_Click"/>
+        <Button x:Name="Save" Content="Save" HorizontalAlignment="Left" VerticalAlignment="Top" Width="47" Margin="209,117,0,0" Click="Save_Click"/>
 
     </Grid>
 </Window>

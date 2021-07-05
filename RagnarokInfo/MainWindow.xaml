@@ -5,13 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RagnarokInfo"
         mc:Ignorable="d"
-        Title="ROinfo" Height="180" Width="340" ResizeMode="NoResize" SizeToContent="Manual" WindowStartupLocation="Manual" Top="40" Left="0">
+        Title="ROinfo" Height="180" Width="350" ResizeMode="NoResize" SizeToContent="Manual" WindowStartupLocation="Manual" Top="40" Left="0">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="0*"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Label x:Name="JExp_Percent" Content="100%" HorizontalAlignment="Left" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Grid.RowSpan="2" VerticalAlignment="Top" Margin="174,37,0,0" FontSize="40" FontWeight="Bold" FontStyle="Italic" FontFamily="Segoe UI Black" Opacity="0.3" Background="White" Foreground="BlueViolet"  RenderTransformOrigin="0.5,0.5">
+        <Label x:Name="JExp_Percent" Content="100%" HorizontalAlignment="Left" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Grid.RowSpan="2" VerticalAlignment="Top" Margin="177,37,0,0" FontSize="40" FontWeight="Bold" FontStyle="Italic" FontFamily="Segoe UI Black" Opacity="0.3" Background="White" Foreground="BlueViolet"  RenderTransformOrigin="0.5,0.5">
             <Label.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -36,10 +36,10 @@
         <Label x:Name="BExp_Req" Content="BExp Req:" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="10,49,0,0"/>
         <Label x:Name="BExp_Gain" Content="BExp Gain:" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="10,71,0,0"/>
         <Label x:Name="BExp_Hr" Content="BExp/hr:" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="10,93,0,0"/>
-        <Label x:Name="JExp" Content="JExp:" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="171,27,0,0"/>
-        <Label x:Name="JExp_Req" Content="JExp Req:" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="171,49,0,0"/>
-        <Label x:Name="JExp_Gain" Content="JExp Gain:" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="171,71,0,0"/>
-        <Label x:Name="JExp_Hr" Content="JExp/hr:" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="171,93,0,0"/>
+        <Label x:Name="JExp" Content="JExp:" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="174,27,0,0"/>
+        <Label x:Name="JExp_Req" Content="JExp Req:" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="174,49,0,0"/>
+        <Label x:Name="JExp_Gain" Content="JExp Gain:" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="174,71,0,0"/>
+        <Label x:Name="JExp_Hr" Content="JExp/hr:" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="174,93,0,0"/>
         <ComboBox x:Name="Char_Combo" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Width="99" Margin="5,125,0,0" SelectionChanged="Char_Combo_SelectionChanged" IsReadOnly="True" SelectedIndex="0">
             <ComboBox.Background>
                 <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
@@ -49,17 +49,18 @@
             </ComboBox.Background>
         </ComboBox>
         <Button x:Name="Refresh_Button" Content="Refresh" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Width="52" Margin="111,126,0,0" Click="Refresh_Button_Click" ToolTip="Refresh data info"/>
-        <CheckBox x:Name="checkBox" Content="View Pet/Homu" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="174,128,0,0" FontSize="11" Checked="checkBox_Checked" Unchecked="checkBox_Checked"/>
+        <CheckBox x:Name="checkBox" Content="View Pet/Homu" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="177,128,0,0" FontSize="11" Checked="checkBox_Checked" Unchecked="checkBox_Checked"/>
         <Label x:Name="label" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="53,27,0,0"/>
         <Label x:Name="label1" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="77,49,0,0"/>
         <Label x:Name="label2" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="80,71,0,0"/>
         <Label x:Name="label3" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="69,93,0,0"/>
-        <Label x:Name="label4" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="212,27,0,0"/>
-        <Label x:Name="label5" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="235,48,0,0"/>
-        <Label x:Name="label6" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="239,71,0,0"/>
-        <Label x:Name="label7" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="227,93,0,0"/>
-        <Button x:Name="Info_Button" Content="?" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Width="20" Margin="307,126,0,0" Background="#FF71CBFF" Click="Info_Button_Click" ToolTip="About" Cursor="Help"/>
-        <Button x:Name="Settings_Button" Content="S" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Width="20" Margin="283,126,0,0" Background="#FFF3D930" Click="Settings_Button_Click" ToolTip="Settings"/>
+        <Label x:Name="label4" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="215,27,0,0"/>
+        <Label x:Name="label5" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="238,48,0,0"/>
+        <Label x:Name="label6" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="242,71,0,0"/>
+        <Label x:Name="label7" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="230,93,0,0"/>
+        <Button x:Name="Info_Button" Content="?" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Width="20" Margin="318,126,0,0" Background="#FF71CBFF" Click="Info_Button_Click" ToolTip="About" Cursor="Help"/>
+        <Button x:Name="Settings_Button" Content="S" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Width="20" Margin="293,126,0,0" Background="#FFF3D930" Click="Settings_Button_Click" ToolTip="Settings"/>
+        <Button x:Name="New_Client_Buton" Content="RO++" VerticalAlignment="Center" Width="38" Margin="300,8,6,125" Click="New_Button_Click" ToolTip="Launch RO Client" Grid.RowSpan="2" Height="18" BorderBrush="{x:Null}" Background="#FF86E49C" FontSize="10"/>
 
     </Grid>
 </Window>

@@ -1,7 +1,7 @@
 ﻿// Project: ClientList.cs
 // Description: ClientList class prototype, used for storing deserialized XML data.
 // Coded and owned by: Hok Uy
-// Last Source Update: 1 December 2017 at 12:57
+// Last Source Update: 27 May 2021
 
 using System.Xml.Serialization;
 
@@ -9,7 +9,6 @@ namespace RagnarokInfo
 {
     public class ClientInfo
     {
-        public string LoggedIn { get; set; }
         public string Account { get; set; }
     }
 

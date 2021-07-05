@@ -6,7 +6,7 @@
         xmlns:xctk="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
         xmlns:local="clr-namespace:RagnarokInfo"
         mc:Ignorable="d"
-        Title="PetInfo" Height="155" Width="340" ResizeMode="NoResize" WindowStartupLocation="Manual" Top="40" Left="340">
+        Title="PetInfo" Height="155" Width="340" ResizeMode="NoResize" WindowStartupLocation="Manual" Top="40" Left="350">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="0*"/>

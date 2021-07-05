@@ -1,7 +1,7 @@
 ﻿// Project: PetInfo.xaml.cs
 // Description: Interaction logic for the PetInfo window of RagnarokInfo
 // Coded and owned by: Hok Uy
-// Last Source Update: 1 December 2017 at 12:57
+// Last Source Update: 11 Jun 2021
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,11 +21,15 @@ namespace RagnarokInfo
         {
             [DllImport("Kernel32.dll")]
             public static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle,
-                                                    int dwProcessId);
+                int dwProcessId);
 
             [DllImport("Kernel32.dll")]
             public static extern bool ReadProcessMemory(IntPtr hProcess, uint lpBaseAddress, byte[] lpBuffer,
-                                                        int nSize, out int lpNumberOfBytesRead);
+                int nSize, out int lpNumberOfBytesRead);
+
+            [DllImport("Kernel32.dll")]
+            public static extern bool WriteProcessMemory(IntPtr hProcess, uint lpBaseAddress, byte[] lpBuffer,
+                int nSize, out int lpNumberOfBytesRead);
         }
         #endregion Winapi
 
@@ -57,6 +61,7 @@ namespace RagnarokInfo
         }
 
         private static IntPtr hProcess = MainWindow.getProcess;
+        private static IntPtr whProcess = MainWindow.getWriteProcess;
         private static IntPtr initProcess = MainWindow.getProcess;
         private static bool isLoggedIn = MainWindow.getLogged;
         private static ClientList mem = MainWindow.mem;
@@ -71,6 +76,7 @@ namespace RagnarokInfo
         private static bool setBeepThresholdH = true, setBeepThresholdP = true;
         private static System.Windows.Threading.DispatcherTimer timer = new System.Windows.Threading.DispatcherTimer();
         private static Sound ding = new Sound();
+        private static String char_name_initial = MainWindow.getCharName;
 
         public PetInfo()
         {
@@ -89,6 +95,7 @@ namespace RagnarokInfo
         {
             isLoggedIn = MainWindow.getLogged;
             hProcess = MainWindow.getProcess;
+            whProcess = MainWindow.getWriteProcess;
 
             if (hProcess != initProcess)
             {
@@ -169,16 +176,33 @@ namespace RagnarokInfo
         {
             try
             {
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 10532, hnBuff, hnBuff.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 10620, hLoy, hLoy.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 10636, hHun, hHun.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 10628, hExp, hExp.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 10632, hExpNeed, hExpNeed.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 10672, hOutB, hOutB.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) - 1512, pnBuff, pnBuff.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) - 1464, pLoy, pLoy.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) - 1468, pHun, pHun.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) - 1476, pOutB, pOutB.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 14140, hnBuff, hnBuff.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 14228, hLoy, hLoy.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 14244, hHun, hHun.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 14236, hExp, hExp.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 14240, hExpNeed, hExpNeed.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 14280, hOutB, hOutB.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) - 1520, pnBuff, pnBuff.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) - 1468, pLoy, pLoy.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) - 1476, pHun, pHun.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) - 1464, pOutB, pOutB.Length, out r);
+            }
+            catch (Exception e)
+            {
+                System.Windows.MessageBox.Show("An exception was thrown because:\n" + e.Message + "\nProgram will now terminate.");
+                Application.Current.Shutdown();
+            }
+        }
+
+        private void resetOutStatus()
+        {
+            try
+            {
+                byte[] clearPetOut = new byte[sizeof(int)];
+                clearPetOut = BitConverter.GetBytes(-1);
+                int r;
+
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) - 1468, clearPetOut, clearPetOut.Length, out r);
             }
             catch (Exception e)
             {
@@ -192,6 +216,12 @@ namespace RagnarokInfo
             Homu_Status.Opacity = MainWindow.LeftOpacity + MainWindow.LeftOpacityOffset;
             Pet_Status.Opacity = MainWindow.RightOpacity + MainWindow.RightOpacityOffset;
             this.Title = "PetInfo for " + MainWindow.getCharName;
+
+            if (MainWindow.getCharName != char_name_initial)
+            {
+                resetOutStatus();
+                char_name_initial = MainWindow.getCharName;
+            }
 
             if (homu_out != 0 && isLoggedIn)
             {
