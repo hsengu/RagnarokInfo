@@ -1,6 +1,4 @@
 # RagnarokInfo
-<<<<<<< HEAD
-This is a working prototype application to read game data from process memory.
 =======
 ## Note: As of 02/01/2020 - I will no longer be maintaining this application due to the implementation of EasyAntiCheat which prevents this application from using standard memory inspection methods to retrieve the necessary data for processing from in-game memory. The business logic of this application is still valid; however, with no access to the data required from game memory, this application is now deprecated.
 ### Description
@@ -45,4 +43,3 @@ Given these data points this application is currently able to extrapolate in add
 
 ### Screenshots
 Coming Soon...
->>>>>>> 46d3a2903ac73fbf0f3ff6b43356494c004957b5
