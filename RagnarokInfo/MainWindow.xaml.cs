@@ -221,7 +221,11 @@ namespace RagnarokInfo
             System.Windows.MessageBox.Show("If you paid for this, you got scammed!.\n"
                                                + "Please do not redistribute without my permission!\n"
                                                + "ROinfo is coded by Hok Uy\n"
+<<<<<<< HEAD
                                                + "© 2021 Build: 20210611");
+=======
+                                               + "© 2019 Build: 20190405");
+>>>>>>> 46d3a2903ac73fbf0f3ff6b43356494c004957b5
         }
 
         private void ReadInfo(bool init)
@@ -381,6 +385,7 @@ namespace RagnarokInfo
         {
             try
             {
+<<<<<<< HEAD
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 23296, nBuff, nBuff.Length, out r);
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 24, bBuff, bBuff.Length, out r);
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 48, jBuff, jBuff.Length, out r);
@@ -389,6 +394,16 @@ namespace RagnarokInfo
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 32, bReq, bReq.Length, out r);
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 40, jReq, jReq.Length, out r);
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 24580, logged, logged.Length, out r);
+=======
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 23096, nBuff, nBuff.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 20, bBuff, bBuff.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 32, jBuff, jBuff.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 36, bLvl, bLvl.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 44, jLvl, jLvl.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 24, bReq, bReq.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 28, jReq, jReq.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 364, logged, logged.Length, out r);
+>>>>>>> 46d3a2903ac73fbf0f3ff6b43356494c004957b5
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16), acct, acct.Length, out r);
             }
             catch(Exception e) {
@@ -405,7 +420,15 @@ namespace RagnarokInfo
 
             try
             {
+<<<<<<< HEAD
                 UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 23296, clear_string, clear_string.Length, out r);
+=======
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 23096, clear_string, clear_string.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 20, clear, clear.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 32, clear, clear.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 36, clear, clear.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 44, clear, clear.Length, out r);
+>>>>>>> 46d3a2903ac73fbf0f3ff6b43356494c004957b5
                 UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 24, clear, clear.Length, out r);
                 UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 48, clear, clear.Length, out r);
                 UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 56, clear, clear.Length, out r);
@@ -432,7 +455,11 @@ namespace RagnarokInfo
                 for (int i = 0; i < ragList.Length; i++)
                 {
                     hProcess = UnsafeNativeMethods.OpenProcess(0x0010, false, ragList[i].Id);
+<<<<<<< HEAD
                     UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 23296, charName, charName.Length, out read);
+=======
+                    UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 23096, charName, charName.Length, out read);
+>>>>>>> 46d3a2903ac73fbf0f3ff6b43356494c004957b5
                     Items.Add(System.Text.Encoding.ASCII.GetString(charName).Trim('\0'));
                     if (Items[i].ToString() == name_initial)
                         newIndex = i;
