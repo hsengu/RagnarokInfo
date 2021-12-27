@@ -228,7 +228,7 @@ namespace RagnarokInfo
                 Homu_Name.Content = homu_name.ToString();
                 label.Content = homu_hun.ToString() + " / 100";
                 label1.Content = homu_loy.ToString() + " / 1000";
-                label2.Content = (homu_need - homu_exp).ToString("N0") + " exp";
+                label2.Content = (homu_need - homu_exp).ToString("N0");
 
                 if (homu_hun > 91)
                 {

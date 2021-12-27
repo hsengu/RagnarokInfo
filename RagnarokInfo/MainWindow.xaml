@@ -55,7 +55,7 @@
         <Label x:Name="label2" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="80,71,0,0"/>
         <Label x:Name="label3" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="69,93,0,0"/>
         <Label x:Name="label4" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="215,27,0,0"/>
-        <Label x:Name="label5" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="238,48,0,0"/>
+        <Label x:Name="label5" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="238,49,0,0"/>
         <Label x:Name="label6" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="242,71,0,0"/>
         <Label x:Name="label7" Content="Label" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Margin="230,93,0,0"/>
         <Button x:Name="Info_Button" Content="?" HorizontalAlignment="Left" Grid.RowSpan="2" VerticalAlignment="Top" Width="20" Margin="318,126,0,0" Background="#FF71CBFF" Click="Info_Button_Click" ToolTip="About" Cursor="Help"/>

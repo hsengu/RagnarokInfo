@@ -1,7 +1,7 @@
 ﻿// Project: MainWindow.xaml.cs
 // Description: Interaction logic for the main window of RagnarokInfo
 // Coded and owned by: Hok Uy
-// Last Source Update: 11 Jun 2021
+// Last Source Update: 26 Dec 2021
 
 using System;
 using System.Windows;
@@ -45,7 +45,7 @@ namespace RagnarokInfo
         private static IntPtr hProcess, whProcess;
         private static String name_initial;
 
-        private static uint b_actual = 0,
+        private static ulong b_actual = 0,
             j_actual = 0,
             b_initial = 0,
             j_initial = 0,
@@ -60,7 +60,9 @@ namespace RagnarokInfo
             b_gained_prev = 0,
             j_gained_prev = 0,
             b_rem = 0,
-            j_rem = 0;
+            j_rem = 0,
+            max_b = 185,
+            max_j = 65;
         private static int acct_id = 0;
         private static double b_exphr = 0, j_exphr = 0, b_percent = 0, j_percent = 0;
         private static Stopwatch stopWatch = new Stopwatch();
@@ -114,7 +116,7 @@ namespace RagnarokInfo
             Process gameProcess = new Process();
             gameProcess.StartInfo.WorkingDirectory = loadedSettings.appSettings.Filepath;
             gameProcess.StartInfo.FileName = "ragexe.exe";
-            gameProcess.StartInfo.Arguments = "-1rag1 -eac-nop-loaded";
+            gameProcess.StartInfo.Arguments = ""; //REDACTED
             gameProcess.Start();
         }
 
@@ -168,14 +170,14 @@ namespace RagnarokInfo
             {
                 this.Title = "ROinfo " + client + "     Lvl: " + b_lvl_init + "/" + j_lvl_init + "     " + getTime();
                 Char_Name.Content = name_initial;
-                label.Content = b_actual.ToString("N0") + " exp";
-                label4.Content = j_actual.ToString("N0") + " exp";
-                label1.Content = b_rem.ToString("N0") + " exp";
-                label5.Content = j_rem.ToString("N0") + " exp";
-                label2.Content = b_gained.ToString("N0") + " exp";
-                label6.Content = j_gained.ToString("N0") + " exp";
-                label3.Content = b_exphr.ToString("N0") + " exp";
-                label7.Content = j_exphr.ToString("N0") + " exp";
+                label.Content = b_actual.ToString("N0");
+                label4.Content = j_actual.ToString("N0");
+                label1.Content = b_lvl_init == max_b ? "Max" : b_rem.ToString("N0");
+                label5.Content = j_lvl_init == max_j ? "Max" : j_rem.ToString("N0");
+                label2.Content = b_gained.ToString("N0");
+                label6.Content = j_gained.ToString("N0");
+                label3.Content = b_exphr.ToString("N0");
+                label7.Content = j_exphr.ToString("N0");
                 BExp_Percent.Content = b_percent.ToString("0.#") + "%";
                 JExp_Percent.Content = j_percent.ToString("0.#") + "%";
             }
@@ -184,28 +186,28 @@ namespace RagnarokInfo
                 if (name_initial == "")
                 {
                     Char_Name.Content = "Not logged in";
-                    label.Content = "0 exp";
-                    label4.Content = "0 exp";
-                    label1.Content = "0 exp";
-                    label5.Content = "0 exp";
-                    label2.Content = "0 exp";
-                    label6.Content = "0 exp";
-                    label3.Content = "0 exp";
-                    label7.Content = "0 exp";
+                    label.Content = "0";
+                    label4.Content = "0";
+                    label1.Content = "0";
+                    label5.Content = "0";
+                    label2.Content = "0";
+                    label6.Content = "0";
+                    label3.Content = "0";
+                    label7.Content = "0";
                     BExp_Percent.Content = "0%";
                     JExp_Percent.Content = "0%";
                 }
                 else
                 {
                     Char_Name.Content = "Last logged in " + name_initial;
-                    label.Content = b_actual.ToString("N0") + " exp";
-                    label4.Content = j_actual.ToString("N0") + " exp";
-                    label1.Content = b_rem.ToString("N0") + " exp";
-                    label5.Content = j_rem.ToString("N0") + " exp";
-                    label2.Content = b_gained.ToString("N0") + " exp";
-                    label6.Content = j_gained.ToString("N0") + " exp";
-                    label3.Content = b_exphr.ToString("N0") + " exp";
-                    label7.Content = j_exphr.ToString("N0") + " exp";
+                    label.Content = b_actual.ToString("N0");
+                    label4.Content = j_actual.ToString("N0");
+                    label1.Content = b_lvl_init == max_b ? "Max" : b_rem.ToString("N0");
+                    label5.Content = j_lvl_init == max_j ? "Max" : j_rem.ToString("N0");
+                    label2.Content = b_gained.ToString("N0");
+                    label6.Content = j_gained.ToString("N0");
+                    label3.Content = b_exphr.ToString("N0");
+                    label7.Content = j_exphr.ToString("N0");
                     BExp_Percent.Content = b_percent.ToString("0.#") + "%";
                     JExp_Percent.Content = j_percent.ToString("0.#") + "%";
                 }
@@ -221,30 +223,30 @@ namespace RagnarokInfo
             System.Windows.MessageBox.Show("If you paid for this, you got scammed!.\n"
                                                + "Please do not redistribute without my permission!\n"
                                                + "ROinfo is coded by Hok Uy\n"
-                                               + "© 2021 Build: 20210611");
+                                               + "© 2021 Build: 20211225");
         }
 
         private void ReadInfo(bool init)
         {
-            byte[] baseBuff = new byte[sizeof(int)];
-            byte[] jobBuff = new byte[sizeof(int)];
+            byte[] baseBuff = new byte[sizeof(long)];
+            byte[] jobBuff = new byte[sizeof(long)];
             byte[] charName = new byte[24];
             byte[] baseLvl = new byte[sizeof(int)];
             byte[] jobLvl = new byte[sizeof(int)];
-            byte[] baseReq = new byte[sizeof(int)];
-            byte[] jobReq = new byte[sizeof(int)];
+            byte[] baseReq = new byte[sizeof(long)];
+            byte[] jobReq = new byte[sizeof(long)];
             byte[] logged = new byte[sizeof(int)];
             byte[] acct = new byte[sizeof(int)];
             int read = 0;
 
             readMem(baseBuff, jobBuff, charName, baseLvl, jobLvl, baseReq, jobReq, logged, acct, ref read);
             String name = System.Text.Encoding.ASCII.GetString(charName).Trim('\0');
-            uint value = BitConverter.ToUInt32(baseBuff, 0);
-            uint value_j = BitConverter.ToUInt32(jobBuff, 0);
-            uint bLvl = BitConverter.ToUInt32(baseLvl, 0);
-            uint jLvl = BitConverter.ToUInt32(jobLvl, 0);
-            uint bReq = BitConverter.ToUInt32(baseReq, 0);
-            uint jReq = BitConverter.ToUInt32(jobReq, 0);
+            ulong value = BitConverter.ToUInt64(baseBuff, 0);
+            ulong value_j = BitConverter.ToUInt64(jobBuff, 0);
+            ulong bLvl = BitConverter.ToUInt32(baseLvl, 0);
+            ulong jLvl = BitConverter.ToUInt32(jobLvl, 0);
+            ulong bReq = BitConverter.ToUInt64(baseReq, 0);
+            ulong jReq = BitConverter.ToUInt64(jobReq, 0);
             int account = BitConverter.ToInt32(acct, 0);
             bool log = (BitConverter.ToInt32(logged, 0) > 0) ? true : false;
 
@@ -260,7 +262,7 @@ namespace RagnarokInfo
             }
         }
 
-        private void calcExp(uint b_current, uint j_current, uint b_lvl_curr, uint j_lvl_curr, uint b_req, uint j_req, bool log, int account, String name)
+        private void calcExp(ulong b_current, ulong j_current, ulong b_lvl_curr, ulong j_lvl_curr, ulong b_req, ulong j_req, bool log, int account, String name)
         {
             bool bLeveled = false, jLeveled = false;
             b_actual = b_current;
@@ -358,7 +360,7 @@ namespace RagnarokInfo
             j_lvl_req = j_req;
         }
 
-        private void resetValues(uint b_current, uint j_current, uint b_lvl_curr, uint j_lvl_curr, uint b_req, uint j_req, bool log, int account, String name)
+        private void resetValues(ulong b_current, ulong j_current, ulong b_lvl_curr, ulong j_lvl_curr, ulong b_req, ulong j_req, bool log, int account, String name)
         {
             startNew = true;
             stopWatch.Reset();
@@ -388,7 +390,7 @@ namespace RagnarokInfo
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 64, jLvl, jLvl.Length, out r);
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 32, bReq, bReq.Length, out r);
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 40, jReq, jReq.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 24580, logged, logged.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 24732, logged, logged.Length, out r);
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16), acct, acct.Length, out r);
             }
             catch(Exception e) {
