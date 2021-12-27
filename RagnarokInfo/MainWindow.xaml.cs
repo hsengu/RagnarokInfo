@@ -178,8 +178,8 @@ namespace RagnarokInfo
                 label6.Content = j_gained.ToString("N0");
                 label3.Content = b_exphr.ToString("N0");
                 label7.Content = j_exphr.ToString("N0");
-                BExp_Percent.Content = b_percent.ToString("0.#") + "%";
-                JExp_Percent.Content = j_percent.ToString("0.#") + "%";
+                BExp_Percent.Content = b_lvl_init == max_b ? "MAX" : b_percent.ToString("0.#") + "%";
+                JExp_Percent.Content = j_lvl_init == max_j ? "MAX" : j_percent.ToString("0.#") + "%";
             }
             else
             {
@@ -208,8 +208,8 @@ namespace RagnarokInfo
                     label6.Content = j_gained.ToString("N0");
                     label3.Content = b_exphr.ToString("N0");
                     label7.Content = j_exphr.ToString("N0");
-                    BExp_Percent.Content = b_percent.ToString("0.#") + "%";
-                    JExp_Percent.Content = j_percent.ToString("0.#") + "%";
+                    BExp_Percent.Content = b_lvl_init == max_b ? "MAX" : b_percent.ToString("0.#") + "%";
+                    JExp_Percent.Content = j_lvl_init == max_j ? "MAX" : j_percent.ToString("0.#") + "%";
                 }
             }
 
