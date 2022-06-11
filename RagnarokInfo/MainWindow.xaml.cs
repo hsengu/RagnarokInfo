@@ -223,7 +223,7 @@ namespace RagnarokInfo
             System.Windows.MessageBox.Show("If you paid for this, you got scammed!.\n"
                                                + "Please do not redistribute without my permission!\n"
                                                + "ROinfo is coded by Hok Uy\n"
-                                               + "© 2021 Build: 20211225");
+                                               + "© 2022 Build: 20220610");
         }
 
         private void ReadInfo(bool init)
