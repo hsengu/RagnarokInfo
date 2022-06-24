@@ -33,9 +33,16 @@ namespace RagnarokInfo
             if (ragList.Length == 0)
             {
                 Process gameProcess = new Process();
+
+                if(settingsWindow.getPath() == "")
+                {
+                    System.Windows.MessageBox.Show("Ragnarok Online is not installed, exiting application.");
+                    Application.Current.Shutdown();
+                }
+
                 gameProcess.StartInfo.WorkingDirectory = settingsWindow.getPath();
                 gameProcess.StartInfo.FileName = "ragexe.exe";
-                gameProcess.StartInfo.Arguments = "-1rag1 -eac-nop-loaded";
+                gameProcess.StartInfo.Arguments = "REDACTED";
                 gameProcess.Start();
             }
             MainWindow mainProg = new MainWindow(0);

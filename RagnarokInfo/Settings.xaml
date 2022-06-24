@@ -13,8 +13,6 @@
         <Label x:Name="RagexeLocation" Content="Ragexe Location" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,50,0,0"/>
         <Button x:Name="Close" Content="Close" HorizontalAlignment="Left" VerticalAlignment="Top" Width="47" Margin="261,117,0,0" Click="Close_Click"/>
         <TextBox x:Name="RagexeTextbox" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="237" Margin="15,76,0,0"/>
-        <Button x:Name="Browse" Content="Browse" HorizontalAlignment="Left" VerticalAlignment="Top" Width="47" Margin="257,78,0,0" Click="Browse_Click"/>
-        <Button x:Name="Save" Content="Save" HorizontalAlignment="Left" VerticalAlignment="Top" Width="47" Margin="209,117,0,0" Click="Save_Click"/>
 
     </Grid>
 </Window>
