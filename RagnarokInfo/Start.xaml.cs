@@ -42,7 +42,7 @@ namespace RagnarokInfo
 
                 gameProcess.StartInfo.WorkingDirectory = settingsWindow.getPath();
                 gameProcess.StartInfo.FileName = "ragexe.exe";
-                gameProcess.StartInfo.Arguments = "REDACTED";
+                gameProcess.StartInfo.Arguments = "-1rag1 -eac-nop-loaded";
                 gameProcess.Start();
             }
             MainWindow mainProg = new MainWindow(0);
