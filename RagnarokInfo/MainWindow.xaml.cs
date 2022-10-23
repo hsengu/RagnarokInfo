@@ -114,7 +114,7 @@ namespace RagnarokInfo
         {
             AppSettings loadedSettings = ClientSelect.getUserSettings();
             Process gameProcess = new Process();
-            gameProcess.StartInfo.WorkingDirectory = loadedSettings.appSettings.Filepath;
+            gameProcess.StartInfo.WorkingDirectory = settings.getPath();
             gameProcess.StartInfo.FileName = "ragexe.exe";
             gameProcess.StartInfo.Arguments = ""; //REDACTED
             gameProcess.Start();
