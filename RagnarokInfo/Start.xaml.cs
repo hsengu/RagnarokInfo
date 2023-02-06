@@ -32,18 +32,13 @@ namespace RagnarokInfo
             Process [] ragList = Process.GetProcessesByName("ragexe");
             if (ragList.Length == 0)
             {
-                Process gameProcess = new Process();
-
                 if(settingsWindow.getPath() == "")
                 {
                     System.Windows.MessageBox.Show("Ragnarok Online is not installed, exiting application.");
                     Application.Current.Shutdown();
                 }
 
-                gameProcess.StartInfo.WorkingDirectory = settingsWindow.getPath();
-                gameProcess.StartInfo.FileName = "ragexe.exe";
-                gameProcess.StartInfo.Arguments = ""; //REDACTED
-                gameProcess.Start();
+                gameStart();
             }
             MainWindow mainProg = new MainWindow(0);
         }
@@ -72,6 +67,15 @@ namespace RagnarokInfo
         public static AppSettings getUserSettings()
         {
             return loadedSettings;
+        }
+
+        public static void gameStart()
+        {
+            Process gameProcess = new Process();
+            gameProcess.StartInfo.WorkingDirectory = settingsWindow.getPath();
+            gameProcess.StartInfo.FileName = "ragexe.exe";
+            gameProcess.StartInfo.Arguments = ""; //REDACTED
+            gameProcess.Start();
         }
     }
 }

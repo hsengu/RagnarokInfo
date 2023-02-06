@@ -90,11 +90,7 @@ namespace RagnarokInfo
         private void New_Button_Click(object sender, RoutedEventArgs e)
         {
             AppSettings loadedSettings = ClientSelect.getUserSettings();
-            Process gameProcess = new Process();
-            gameProcess.StartInfo.WorkingDirectory = settings.getPath();
-            gameProcess.StartInfo.FileName = "ragexe.exe";
-            gameProcess.StartInfo.Arguments = ""; //REDACTED
-            gameProcess.Start();
+            ClientSelect.gameStart();
         }
 
         private void Char_Combo_SelectionChanged(object sender, SelectionChangedEventArgs e)

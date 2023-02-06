@@ -65,7 +65,6 @@ namespace RagnarokInfo
         private static IntPtr initProcess = MainWindow.getProcess;
         private static bool isLoggedIn = MainWindow.getLogged;
         private static ClientInfo client = MainWindow.mem;
-        private static int sClient = MainWindow.sClient;
         private static String homu_name, pet_name;
         private static int homu_loy = 0, pet_loy = 0,
                            homu_hun = 0, pet_hun = 0,
