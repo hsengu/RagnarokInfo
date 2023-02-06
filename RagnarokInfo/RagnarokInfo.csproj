@@ -121,6 +121,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Character_Info.cs" />
     <Compile Include="UserSettings.cs" />
     <Compile Include="ClientList.cs" />
     <Compile Include="PetInfo.xaml.cs">

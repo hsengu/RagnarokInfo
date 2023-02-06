@@ -1,7 +1,34 @@
 <?xml version="1.0"?>
 <ClientList>
-<!-- Memory addresses for iRO Renewal Client -->
+	<!-- Memory addresses for iRO Renewal Client -->
 	<ClientInfo>
 		<Account>10607DC</Account>
+		<Offsets>
+			<LoggedIn>+24552</LoggedIn>
+			<Character>
+				<Name>+23268</Name>
+				<BaseLevel>+52</BaseLevel>
+				<BaseExp>+20</BaseExp>
+				<BaseExpRequired>+28</BaseExpRequired>
+				<JobLevel>+60</JobLevel>
+				<JobExp>+44</JobExp>
+				<JobExpRequired>+36</JobExpRequired>
+			</Character>
+			<Homunculus>
+				<Name>+14140</Name>
+				<Out>+14280</Out>
+				<Loyalty>+14228</Loyalty>
+				<Exp>+14236</Exp>
+				<ExpRequired>+14240</ExpRequired>
+				<Hunger>+14244</Hunger>
+			</Homunculus>
+			<Pet>
+				<Name>4294965776</Name>
+				<Out>-1484</Out>
+				<Loyalty>-1468</Loyalty>
+				<Hunger>-1476</Hunger>
+			</Pet>
+		</Offsets>
 	</ClientInfo>
 </ClientList>
+

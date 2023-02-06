@@ -3,19 +3,87 @@
 // Coded and owned by: Hok Uy
 // Last Source Update: 27 May 2021
 
+using System;
 using System.Xml.Serialization;
+using System.Collections.Generic;
 
 namespace RagnarokInfo
 {
-    public class ClientInfo
-    {
-        public string Account { get; set; }
-    }
+	[XmlRoot(ElementName = "Character")]
+	public class Character
+	{
+		[XmlElement(ElementName = "Name")]
+		public uint Name { get; set; }
+		[XmlElement(ElementName = "BaseLevel")]
+		public uint BaseLevel { get; set; }
+		[XmlElement(ElementName = "BaseExp")]
+		public uint BaseExp { get; set; }
+		[XmlElement(ElementName = "BaseExpRequired")]
+		public uint BaseExpRequired { get; set; }
+		[XmlElement(ElementName = "JobLevel")]
+		public uint JobLevel { get; set; }
+		[XmlElement(ElementName = "JobExp")]
+		public uint JobExp { get; set; }
+		[XmlElement(ElementName = "JobExpRequired")]
+		public uint JobExpRequired { get; set; }
+	}
 
-    [XmlRootAttribute("ClientList")]
-    public class ClientList
-    {
-        [XmlElement("ClientInfo")]
-        public ClientInfo[] clientList { get; set; }
-    }
+	[XmlRoot(ElementName = "Homunculus")]
+	public class Homunculus
+	{
+		[XmlElement(ElementName = "Name")]
+		public uint Name { get; set; }
+		[XmlElement(ElementName = "Out")]
+		public uint Out { get; set; }
+		[XmlElement(ElementName = "Loyalty")]
+		public uint Loyalty { get; set; }
+		[XmlElement(ElementName = "Exp")]
+		public uint Exp { get; set; }
+		[XmlElement(ElementName = "ExpRequired")]
+		public uint ExpRequired { get; set; }
+		[XmlElement(ElementName = "Hunger")]
+		public uint Hunger { get; set; }
+	}
+
+	[XmlRoot(ElementName = "Pet")]
+	public class Pet
+	{
+		[XmlElement(ElementName = "Name")]
+		public uint Name { get; set; }
+		[XmlElement(ElementName = "Out")]
+		public uint Out { get; set; }
+		[XmlElement(ElementName = "Loyalty")]
+		public uint Loyalty { get; set; }
+		[XmlElement(ElementName = "Hunger")]
+		public uint Hunger { get; set; }
+	}
+
+	[XmlRoot(ElementName = "Offsets")]
+	public class Offsets
+	{
+		[XmlElement(ElementName = "LoggedIn")]
+		public uint LoggedIn { get; set; }
+		[XmlElement(ElementName = "Character")]
+		public Character Character { get; set; }
+		[XmlElement(ElementName = "Homunculus")]
+		public Homunculus Homunculus { get; set; }
+		[XmlElement(ElementName = "Pet")]
+		public Pet Pet { get; set; }
+	}
+
+	[XmlRoot(ElementName = "ClientInfo")]
+	public class ClientInfo
+	{
+		[XmlElement(ElementName = "Account")]
+		public string Account { get; set; }
+		[XmlElement(ElementName = "Offsets")]
+		public Offsets Offsets { get; set; }
+	}
+
+	[XmlRoot(ElementName = "ClientList")]
+	public class ClientList
+	{
+		[XmlElement(ElementName = "ClientInfo")]
+		public ClientInfo Client { get; set; }
+	}
 }

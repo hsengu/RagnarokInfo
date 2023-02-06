@@ -64,7 +64,7 @@ namespace RagnarokInfo
         private static IntPtr whProcess = MainWindow.getWriteProcess;
         private static IntPtr initProcess = MainWindow.getProcess;
         private static bool isLoggedIn = MainWindow.getLogged;
-        private static ClientList mem = MainWindow.mem;
+        private static ClientInfo client = MainWindow.mem;
         private static int sClient = MainWindow.sClient;
         private static String homu_name, pet_name;
         private static int homu_loy = 0, pet_loy = 0,
@@ -176,17 +176,17 @@ namespace RagnarokInfo
         {
             try
             {
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 14140, hnBuff, hnBuff.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 14280, hOutB, hOutB.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 14228, hLoy, hLoy.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 14236, hExp, hExp.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 14240, hExpNeed, hExpNeed.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) + 14244, hHun, hHun.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Homunculus.Name, hnBuff, hnBuff.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Homunculus.Out, hOutB, hOutB.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Homunculus.Loyalty, hLoy, hLoy.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Homunculus.Exp, hExp, hExp.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Homunculus.ExpRequired, hExpNeed, hExpNeed.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Homunculus.Hunger, hHun, hHun.Length, out r);
 
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) - 1520, pnBuff, pnBuff.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) - 1484, pOutB, pOutB.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) - 1468, pLoy, pLoy.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) - 1476, pHun, pHun.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) - client.Offsets.Pet.Name, pnBuff, pnBuff.Length, out r);;
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) - client.Offsets.Pet.Out, pOutB, pOutB.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) - client.Offsets.Pet.Loyalty, pLoy, pLoy.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) - client.Offsets.Pet.Hunger, pHun, pHun.Length, out r);
 
             }
             catch (Exception e)
@@ -204,7 +204,7 @@ namespace RagnarokInfo
                 clearPetOut = BitConverter.GetBytes(-1);
                 int r;
 
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(mem.clientList[sClient].Account, 16) - 1596, clearPetOut, clearPetOut.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) - 1596, clearPetOut, clearPetOut.Length, out r);
             }
             catch (Exception e)
             {

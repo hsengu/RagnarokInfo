@@ -11,8 +11,6 @@ using System.Runtime.InteropServices;
 using System.IO;
 using System.Xml.Serialization;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace RagnarokInfo
 {
@@ -43,40 +41,19 @@ namespace RagnarokInfo
         private static Process[] ragList;
         private static ObservableCollection<string> Items = new ObservableCollection<string>();
         private static IntPtr hProcess, whProcess;
-        private static String name_initial;
-
-        private static ulong b_actual = 0,
-            j_actual = 0,
-            b_initial = 0,
-            j_initial = 0,
-            b_gained = 0,
-            j_gained = 0,
-            b_lvl_init = 0,
-            j_lvl_init = 0,
-            b_lvl_req = 0,
-            j_lvl_req = 0,
-            b_last = 0,
-            j_last = 0,
-            b_gained_prev = 0,
-            j_gained_prev = 0,
-            b_rem = 0,
-            j_rem = 0,
-            max_b = 185,
-            max_j = 65;
-        private static int acct_id = 0;
-        private static double b_exphr = 0, j_exphr = 0, b_percent = 0, j_percent = 0;
+        private static Character_Info character = new Character_Info();
         private static Stopwatch stopWatch = new Stopwatch();
         private static double elapsed = 0;
         private static bool startNew = true;
         private static bool firstRun = true;
         private static bool refreshOnNextLog = true;
-        private static bool logged_in = false;
         private static double defaultLeftOpacity = 0, defaultRightOpacity = 0, leftOpacityOffset = 0, rightOpacityOffset = 0;
         private static System.Windows.Threading.DispatcherTimer timer = new System.Windows.Threading.DispatcherTimer();
         private static System.Windows.Threading.DispatcherTimer listUpdateTimer = new System.Windows.Threading.DispatcherTimer();
         private static RagnarokInfo.PetInfo petInfo;
         private static RagnarokInfo.Settings settings;
-        private static ClientList memAddr;
+        private static ClientInfo client;
+/*        private static ClientList memAddr;*/
 
         public MainWindow(int cSelect)
         {
@@ -166,24 +143,24 @@ namespace RagnarokInfo
                     break;
             }
 
-            if (logged_in)
+            if (character.Logged_In)
             {
-                this.Title = "ROinfo " + client + "     Lvl: " + b_lvl_init + "/" + j_lvl_init + "     " + getTime();
-                Char_Name.Content = name_initial;
-                label.Content = b_actual.ToString("N0");
-                label4.Content = j_actual.ToString("N0");
-                label1.Content = b_lvl_init == max_b ? "Max" : b_rem.ToString("N0");
-                label5.Content = j_lvl_init == max_j ? "Max" : j_rem.ToString("N0");
-                label2.Content = b_gained.ToString("N0");
-                label6.Content = j_gained.ToString("N0");
-                label3.Content = b_exphr.ToString("N0");
-                label7.Content = j_exphr.ToString("N0");
-                BExp_Percent.Content = b_lvl_init == max_b ? "MAX" : b_percent.ToString("0.#") + "%";
-                JExp_Percent.Content = j_lvl_init == max_j ? "MAX" : j_percent.ToString("0.#") + "%";
+                this.Title = "ROinfo " + client + "     Lvl: " + character.Base.level_initial + "/" + character.Job.level_initial + "     " + getTime();
+                Char_Name.Content = character.Name;
+                label.Content = character.Base.actual.ToString("N0");
+                label4.Content = character.Job.actual.ToString("N0");
+                label1.Content = character.Base.is_max() ? "Max" : character.Base.remaining.ToString("N0");
+                label5.Content = character.Job.is_max() ? "Max" : character.Job.remaining.ToString("N0");
+                label2.Content = character.Base.gained.ToString("N0");
+                label6.Content = character.Job.gained.ToString("N0");
+                label3.Content = character.Base.hour.ToString("N0");
+                label7.Content = character.Job.hour.ToString("N0");
+                BExp_Percent.Content = character.Base.is_max() ? "MAX" : character.Base.percent.ToString("0.#") + "%";
+                JExp_Percent.Content = character.Job.is_max() ? "MAX" : character.Job.percent.ToString("0.#") + "%";
             }
             else
             {
-                if (name_initial == "")
+                if (character.Name == "")
                 {
                     Char_Name.Content = "Not logged in";
                     label.Content = "0";
@@ -199,17 +176,17 @@ namespace RagnarokInfo
                 }
                 else
                 {
-                    Char_Name.Content = "Last logged in " + name_initial;
-                    label.Content = b_actual.ToString("N0");
-                    label4.Content = j_actual.ToString("N0");
-                    label1.Content = b_lvl_init == max_b ? "Max" : b_rem.ToString("N0");
-                    label5.Content = j_lvl_init == max_j ? "Max" : j_rem.ToString("N0");
-                    label2.Content = b_gained.ToString("N0");
-                    label6.Content = j_gained.ToString("N0");
-                    label3.Content = b_exphr.ToString("N0");
-                    label7.Content = j_exphr.ToString("N0");
-                    BExp_Percent.Content = b_lvl_init == max_b ? "MAX" : b_percent.ToString("0.#") + "%";
-                    JExp_Percent.Content = j_lvl_init == max_j ? "MAX" : j_percent.ToString("0.#") + "%";
+                    Char_Name.Content = "Last logged in " + character.Name;
+                    label.Content = character.Base.actual.ToString("N0");
+                    label4.Content = character.Job.actual.ToString("N0");
+                    label1.Content = character.Base.is_max() ? "Max" : character.Base.remaining.ToString("N0");
+                    label5.Content = character.Job.is_max() ? "Max" : character.Job.remaining.ToString("N0");
+                    label2.Content = character.Base.gained.ToString("N0");
+                    label6.Content = character.Job.gained.ToString("N0");
+                    label3.Content = character.Base.hour.ToString("N0");
+                    label7.Content = character.Job.hour.ToString("N0");
+                    BExp_Percent.Content = character.Base.is_max() ? "MAX" : character.Base.percent.ToString("0.#") + "%";
+                    JExp_Percent.Content = character.Job.is_max() ? "MAX" : character.Job.percent.ToString("0.#") + "%";
                 }
             }
 
@@ -252,7 +229,7 @@ namespace RagnarokInfo
 
             if (!init)
             {
-                logged_in = log;
+                character.Logged_In = log;
                 calcExp(value, value_j, bLvl, jLvl, bReq, jReq, log, account, name);
             }
             else
@@ -265,14 +242,14 @@ namespace RagnarokInfo
         private void calcExp(ulong b_current, ulong j_current, ulong b_lvl_curr, ulong j_lvl_curr, ulong b_req, ulong j_req, bool log, int account, String name)
         {
             bool bLeveled = false, jLeveled = false;
-            b_actual = b_current;
-            j_actual = j_current;
-            b_rem = b_req - b_current;
-            j_rem = j_req - j_current;
-            b_percent = ((double)b_actual / b_req) * 100;
-            j_percent = ((double)j_actual / j_req) * 100;
+            character.Base.actual = b_current;
+            character.Job.actual = j_current;
+            character.Base.remaining = b_req - b_current;
+            character.Job.remaining = j_req - j_current;
+            character.Base.percent = ((double)character.Base.actual / b_req) * 100;
+            character.Job.percent = ((double)character.Job.actual / j_req) * 100;
 
-            if (log == false && account != acct_id)
+            if (log == false && account != character.Account)
             {
                 clearMem();
                 ReadInfo(true);
@@ -280,7 +257,7 @@ namespace RagnarokInfo
             }
             else if (log == false)
             {
-                if (name == name_initial && name != "")
+                if (name == character.Name && name != "")
                 {
                     stopWatch.Stop();
                     return;
@@ -294,8 +271,8 @@ namespace RagnarokInfo
 
             if (startNew)
             {
-                b_last = b_initial;
-                j_last = j_initial;
+                character.Base.previous_value = character.Base.initial;
+                character.Job.previous_value = character.Job.initial;
                 startNew = false;
             }
             else if (refreshOnNextLog)
@@ -304,44 +281,13 @@ namespace RagnarokInfo
                 refreshOnNextLog = false;
                 return;
             }
-            else if (b_gained > 0 || j_gained > 0)
+            else if (character.Base.gained > 0 || character.Job.gained > 0)
                 stopWatch.Start();
 
-            if (b_lvl_curr == (b_lvl_init + 1))
-            {
-                b_gained += (b_lvl_req - b_initial - b_gained + b_gained_prev + b_current);
-                b_last = b_initial = b_current;
-                b_lvl_init = b_lvl_curr;
-                b_lvl_req = b_req;
-                bLeveled = true;
-            }
+            checkLeveled(ref b_current, ref b_lvl_curr, ref b_req, ref bLeveled, character.Base);
+            checkLeveled(ref j_current, ref j_lvl_curr, ref j_req, ref jLeveled, character.Job);
 
-            if (j_lvl_curr == (j_lvl_init + 1))
-            {
-                j_gained += (j_lvl_req - j_initial - j_gained + j_gained_prev + j_current);
-                j_last = j_initial = j_current;
-                j_lvl_init = j_lvl_curr;
-                j_lvl_req = j_req;
-                jLeveled = true;
-            }
-
-            if (!bLeveled && (b_current - b_last) != 0)
-            {
-                b_gained += b_current - b_last;
-                b_last = b_current;
-            }
-            else if (bLeveled)
-                b_gained_prev = b_gained;
-
-            if (!jLeveled && (j_current - j_last) != 0)
-            {
-                j_gained += j_current - j_last;
-                j_last = j_current;
-            }
-            else if (jLeveled)
-                j_gained_prev = j_gained;
-
-            if (b_gained != 0 || j_gained != 0)
+            if (character.Base.gained != 0 || character.Job.gained != 0)
             {
                 if (stopWatch.ElapsedMilliseconds == 0)
                 {
@@ -354,46 +300,35 @@ namespace RagnarokInfo
 
             double elapsedMilliseconds = Math.Max(0, stopWatch.ElapsedMilliseconds);
             elapsed = 3600000.0 / elapsedMilliseconds;
-            b_exphr = b_gained * elapsed;
-            j_exphr = j_gained * elapsed;
-            b_lvl_req = b_req;
-            j_lvl_req = j_req;
+            character.Base.hour = character.Base.gained * elapsed;
+            character.Job.hour = character.Job.gained * elapsed;
+            character.Base.level_required = b_req;
+            character.Job.level_required = j_req;
         }
 
         private void resetValues(ulong b_current, ulong j_current, ulong b_lvl_curr, ulong j_lvl_curr, ulong b_req, ulong j_req, bool log, int account, String name)
         {
             startNew = true;
             stopWatch.Reset();
-            name_initial = name;
-            acct_id = account;
-            b_actual = b_initial = b_current;
-            j_actual = j_initial = j_current;
-            b_lvl_init = b_lvl_curr;
-            j_lvl_init = j_lvl_curr;
-            b_lvl_req = b_req;
-            j_lvl_req = j_req;
-            b_rem = b_req - b_actual;
-            j_rem = j_req - j_actual;
-            elapsed = b_last = j_last = b_gained_prev = j_gained_prev = b_gained = j_gained = 0;
-            b_percent = j_percent = b_exphr = j_exphr = 0;
-            logged_in = log;
+            character.set(b_current, j_current, b_lvl_curr, j_lvl_curr, b_req, j_req, log, account, name);
+            elapsed = 0;
         }
 
         private void readMem(byte[] bBuff, byte[] jBuff, byte[] nBuff, byte[] bLvl, byte[] jLvl, byte[] bReq, byte[] jReq, byte[] logged, byte[] acct, ref int r)
         {
             try
             {
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16), acct, acct.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 23268, nBuff, nBuff.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 24552, logged, logged.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16), acct, acct.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.Name, nBuff, nBuff.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.LoggedIn, logged, logged.Length, out r);
 
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 52, bLvl, bLvl.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 20, bBuff, bBuff.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 28, bReq, bReq.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseLevel, bLvl, bLvl.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseExp, bBuff, bBuff.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseExpRequired, bReq, bReq.Length, out r);
 
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 60, jLvl, jLvl.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 44, jBuff, jBuff.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 36, jReq, jReq.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobLevel, jLvl, jLvl.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobExp, jBuff, jBuff.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobExpRequired, jReq, jReq.Length, out r);
             }
             catch(Exception e) {
                 System.Windows.MessageBox.Show("An exception was thrown because:\n" + e.Message + "\nProgram will now terminate.");
@@ -409,15 +344,15 @@ namespace RagnarokInfo
 
             try
             {
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 23268, clear_string, clear_string.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.Name, clear_string, clear_string.Length, out r);
 
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 52, clear, clear.Length, out r);
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 20, clear, clear.Length, out r);
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 28, clear, clear.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseLevel, clear, clear.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseExp, clear, clear.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseExpRequired, clear, clear.Length, out r);
 
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 60, clear, clear.Length, out r);
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 44, clear, clear.Length, out r);
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 36, clear, clear.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobLevel, clear, clear.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobExp, clear, clear.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobExpRequired, clear, clear.Length, out r);
             }
             catch(Exception e) {
                 System.Windows.MessageBox.Show("An exception was thrown because:\n" + e.Message + "\nProgram will now terminate.");
@@ -438,9 +373,9 @@ namespace RagnarokInfo
                 for (int i = 0; i < ragList.Length; i++)
                 {
                     hProcess = UnsafeNativeMethods.OpenProcess(0x0010, false, ragList[i].Id);
-                    UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 23264, charName, charName.Length, out read);
+                    UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.Name, charName, charName.Length, out read);
                     Items.Add(System.Text.Encoding.ASCII.GetString(charName).Trim('\0'));
-                    if (Items[i].ToString() == name_initial)
+                    if (Items[i].ToString() == character.Name)
                         newIndex = i;
                 }
             }
@@ -511,7 +446,11 @@ namespace RagnarokInfo
                 using (TextReader reader = new StreamReader(Directory.GetCurrentDirectory() + "\\AddressList.xml"))
                 {
                     XmlSerializer serializer = new XmlSerializer(typeof(ClientList));
-                    memAddr = (ClientList)serializer.Deserialize(reader);
+                    // Set event handlers for unknown nodes/attributes
+                    serializer.UnknownNode += new XmlNodeEventHandler(serializer_UnknownNode);
+                    serializer.UnknownAttribute += new XmlAttributeEventHandler(serializer_UnknownAttribute);
+                    client = ((ClientList)serializer.Deserialize(reader)).Client;
+                    /*account = memAddr;*/
                 }
             }
             catch (Exception e)
@@ -532,6 +471,28 @@ namespace RagnarokInfo
             return time;
         }
 
+        private void checkLeveled(ref ulong current, ref ulong level_current, ref ulong exp_required, ref bool leveled, Character_Info.Exp_template exp)
+        {
+            if (level_current == (exp.level_initial + 1))
+            {
+                exp.gained += (exp.remaining - exp.initial - exp.gained + exp.previous_gained + current);
+                exp.previous_value = exp.initial = current;
+                exp.level_initial = level_current;
+                exp.remaining = exp_required;
+                leveled = true;
+            }
+
+            if (!leveled && (current - exp.previous_value) != 0)
+            {
+                exp.gained += current - exp.previous_value;
+                exp.previous_value = current;
+            }
+            else if (leveled)
+            {
+                exp.previous_gained = exp.gained;
+            }
+        }
+
         public static IntPtr getProcess
         {
             get { return hProcess; }
@@ -543,12 +504,12 @@ namespace RagnarokInfo
         }
         public static String getCharName
         {
-            get { return name_initial; }
+            get { return character.Name; }
         }
 
         public static bool getLogged
         {
-            get { return logged_in; }
+            get { return character.Logged_In; }
         }
 
         public static double LeftOpacity
@@ -572,9 +533,9 @@ namespace RagnarokInfo
             set { rightOpacityOffset = value; }
         }
 
-        public static ClientList mem
+        public static ClientInfo mem
         {
-            get { return memAddr; }
+            get { return client; }
         }
 
         public static int sClient
@@ -587,6 +548,16 @@ namespace RagnarokInfo
         {
             base.OnClosed(e);
             Application.Current.Shutdown();
+        }
+
+        private static void serializer_UnknownAttribute(object sender, XmlAttributeEventArgs e)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        private static void serializer_UnknownNode(object sender, XmlNodeEventArgs e)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
