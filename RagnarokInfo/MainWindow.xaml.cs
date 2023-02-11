@@ -1,7 +1,7 @@
 ﻿// Project: MainWindow.xaml.cs
 // Description: Interaction logic for the main window of RagnarokInfo
 // Coded and owned by: Hok Uy
-// Last Source Update: 03 Feb 2023
+// Last Source Update: 06 Feb 2023
 
 using System;
 using System.Windows;
@@ -53,7 +53,7 @@ namespace RagnarokInfo
         private static RagnarokInfo.PetInfo petInfo;
         private static RagnarokInfo.Settings settings;
         private static ClientInfo client;
-/*        private static ClientList memAddr;*/
+        private static Calculator calc = new Calculator();
 
         public MainWindow(int cSelect)
         {
@@ -119,29 +119,81 @@ namespace RagnarokInfo
 
         private void dispatcherTimer_Tick(object sender, EventArgs e)
         {
-            String client;
             ReadInfo(false);
+            OutputInfo();
+            timer.Start();
+        }
+
+        private void Info_Button_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.MessageBox.Show("If you paid for this, you got scammed!.\n"
+                                               + "Please do not redistribute without my permission!\n"
+                                               + "ROinfo is coded by Hok Uy\n"
+                                               + "© 2023 Build: 20230203");
+        }
+
+        private void ReadInfo(bool init)
+        {
+            byte[] baseBuff = new byte[sizeof(long)];
+            byte[] jobBuff = new byte[sizeof(long)];
+            byte[] charName = new byte[24];
+            byte[] baseLvl = new byte[sizeof(int)];
+            byte[] jobLvl = new byte[sizeof(int)];
+            byte[] baseReq = new byte[sizeof(long)];
+            byte[] jobReq = new byte[sizeof(long)];
+            byte[] logged = new byte[sizeof(int)];
+            byte[] acct = new byte[sizeof(int)];
+            int read = 0;
+
+            readMem(baseBuff, jobBuff, charName, baseLvl, jobLvl, baseReq, jobReq, logged, acct, ref read);
+            String name = System.Text.Encoding.ASCII.GetString(charName).Trim('\0');
+            long value = BitConverter.ToInt64(baseBuff, 0);
+            long value_j = BitConverter.ToInt64(jobBuff, 0);
+            long bLvl = BitConverter.ToInt32(baseLvl, 0);
+            long jLvl = BitConverter.ToInt32(jobLvl, 0);
+            long bReq = BitConverter.ToInt64(baseReq, 0);
+            long jReq = BitConverter.ToInt64(jobReq, 0);
+            int account = BitConverter.ToInt32(acct, 0);
+            bool log = (BitConverter.ToInt32(logged, 0) > 0) ? true : false;
+
+            if (!init)
+            {
+                character.Logged_In = log;
+                //calcExp(value, value_j, bLvl, jLvl, bReq, jReq, log, account, name);
+                calc.calcExp(character, stopWatch, ref elapsed, ref firstRun, ref refreshOnNextLog, ref startNew);
+            }
+            else
+            {
+                resetValues(value, value_j, bLvl, jLvl, bReq, jReq, log, account, name);
+                getProcesses();
+            }
+        }
+
+        private void OutputInfo()
+        {
+            String clientType;
+
             LeftOpacityOffset = RightOpacityOffset = settings.getOpacity;
             BExp_Percent.Opacity = LeftOpacity + LeftOpacityOffset;
             JExp_Percent.Opacity = RightOpacity + RightOpacityOffset;
 
-            switch(clientSelect)
+            switch (clientSelect)
             {
                 default:
                 case 0:
-                    client = "Renewal";
+                    clientType = "Renewal";
                     break;
                 case 1:
-                    client = "Classic";
+                    clientType = "Classic";
                     break;
                 case 2:
-                    client = "Sakray";
+                    clientType = "Sakray";
                     break;
             }
 
             if (character.Logged_In)
             {
-                this.Title = "ROinfo " + client + "     Lvl: " + character.Base.level_initial + "/" + character.Job.level_initial + "     " + getTime();
+                this.Title = "ROinfo " + clientType + "     Lvl: " + character.Base.level_initial + "/" + character.Job.level_initial + "     " + getTime();
                 Char_Name.Content = character.Name;
                 label.Content = character.Base.actual.ToString("N0");
                 label4.Content = character.Job.actual.ToString("N0");
@@ -188,54 +240,9 @@ namespace RagnarokInfo
 
             if (petInfo != null && petInfo.IsVisible == false)
                 checkBox.IsChecked = false;
-            timer.Start();
         }
 
-        private void Info_Button_Click(object sender, RoutedEventArgs e)
-        {
-            System.Windows.MessageBox.Show("If you paid for this, you got scammed!.\n"
-                                               + "Please do not redistribute without my permission!\n"
-                                               + "ROinfo is coded by Hok Uy\n"
-                                               + "© 2023 Build: 20230203");
-        }
-
-        private void ReadInfo(bool init)
-        {
-            byte[] baseBuff = new byte[sizeof(long)];
-            byte[] jobBuff = new byte[sizeof(long)];
-            byte[] charName = new byte[24];
-            byte[] baseLvl = new byte[sizeof(int)];
-            byte[] jobLvl = new byte[sizeof(int)];
-            byte[] baseReq = new byte[sizeof(long)];
-            byte[] jobReq = new byte[sizeof(long)];
-            byte[] logged = new byte[sizeof(int)];
-            byte[] acct = new byte[sizeof(int)];
-            int read = 0;
-
-            readMem(baseBuff, jobBuff, charName, baseLvl, jobLvl, baseReq, jobReq, logged, acct, ref read);
-            String name = System.Text.Encoding.ASCII.GetString(charName).Trim('\0');
-            ulong value = BitConverter.ToUInt64(baseBuff, 0);
-            ulong value_j = BitConverter.ToUInt64(jobBuff, 0);
-            ulong bLvl = BitConverter.ToUInt32(baseLvl, 0);
-            ulong jLvl = BitConverter.ToUInt32(jobLvl, 0);
-            ulong bReq = BitConverter.ToUInt64(baseReq, 0);
-            ulong jReq = BitConverter.ToUInt64(jobReq, 0);
-            int account = BitConverter.ToInt32(acct, 0);
-            bool log = (BitConverter.ToInt32(logged, 0) > 0) ? true : false;
-
-            if (!init)
-            {
-                character.Logged_In = log;
-                calcExp(value, value_j, bLvl, jLvl, bReq, jReq, log, account, name);
-            }
-            else
-            {
-                resetValues(value, value_j, bLvl, jLvl, bReq, jReq, log, account, name);
-                getProcesses();
-            }
-        }
-
-        private void calcExp(ulong b_current, ulong j_current, ulong b_lvl_curr, ulong j_lvl_curr, ulong b_req, ulong j_req, bool log, int account, String name)
+/*        private void calcExp(long b_current, long j_current, long b_lvl_curr, long j_lvl_curr, long b_req, long j_req, bool log, int account, String name)
         {
             bool bLeveled = false, jLeveled = false;
             character.Base.actual = b_current;
@@ -300,9 +307,9 @@ namespace RagnarokInfo
             character.Job.hour = character.Job.gained * elapsed;
             character.Base.level_required = b_req;
             character.Job.level_required = j_req;
-        }
+        }*/
 
-        private void resetValues(ulong b_current, ulong j_current, ulong b_lvl_curr, ulong j_lvl_curr, ulong b_req, ulong j_req, bool log, int account, String name)
+        private void resetValues(long b_current, long j_current, long b_lvl_curr, long j_lvl_curr, long b_req, long j_req, bool log, int account, String name)
         {
             startNew = true;
             stopWatch.Reset();
@@ -442,11 +449,7 @@ namespace RagnarokInfo
                 using (TextReader reader = new StreamReader(Directory.GetCurrentDirectory() + "\\AddressList.xml"))
                 {
                     XmlSerializer serializer = new XmlSerializer(typeof(ClientList));
-                    // Set event handlers for unknown nodes/attributes
-                    serializer.UnknownNode += new XmlNodeEventHandler(serializer_UnknownNode);
-                    serializer.UnknownAttribute += new XmlAttributeEventHandler(serializer_UnknownAttribute);
                     client = ((ClientList)serializer.Deserialize(reader)).Client;
-                    /*account = memAddr;*/
                 }
             }
             catch (Exception e)
@@ -467,7 +470,7 @@ namespace RagnarokInfo
             return time;
         }
 
-        private void checkLeveled(ref ulong current, ref ulong level_current, ref ulong exp_required, ref bool leveled, Character_Info.Exp_template exp)
+/*        private void checkLeveled(ref long current, ref long level_current, ref long exp_required, ref bool leveled, Character_Info.Exp_template exp)
         {
             if (level_current == (exp.level_initial + 1))
             {
@@ -487,7 +490,7 @@ namespace RagnarokInfo
             {
                 exp.previous_gained = exp.gained;
             }
-        }
+        }*/
 
         public static IntPtr getProcess
         {
@@ -540,20 +543,20 @@ namespace RagnarokInfo
             set { clientSelect = value; }
         }
 
+        public static Homunculus getHomunculus
+        {
+            get { return character.homunculus; }
+        }
+
+        public static Pet getPet
+        {
+            get { return character.pet; }
+        }
+
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
             Application.Current.Shutdown();
-        }
-
-        private static void serializer_UnknownAttribute(object sender, XmlAttributeEventArgs e)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        private static void serializer_UnknownNode(object sender, XmlNodeEventArgs e)
-        {
-            throw new System.NotImplementedException();
         }
     }
 }

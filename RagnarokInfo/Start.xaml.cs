@@ -1,7 +1,7 @@
 ﻿// Project: Start.xaml.cs
 // Description: Interaction logic for the PetInfo window of RagnarokInfo
 // Coded and owned by: Hok Uy
-// Last Source Update: 27 May 2021
+// Last Source Update: 06 Feb 2023
 
 using System;
 using System.Diagnostics;
@@ -74,7 +74,7 @@ namespace RagnarokInfo
             Process gameProcess = new Process();
             gameProcess.StartInfo.WorkingDirectory = settingsWindow.getPath();
             gameProcess.StartInfo.FileName = "ragexe.exe";
-            gameProcess.StartInfo.Arguments = ""; //REDACTED
+            gameProcess.StartInfo.Arguments = "1rag1 -eac-nop-loaded"; //REDACTED
             gameProcess.Start();
         }
     }

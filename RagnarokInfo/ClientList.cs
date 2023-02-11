@@ -1,7 +1,7 @@
 ﻿// Project: ClientList.cs
 // Description: ClientList class prototype, used for storing deserialized XML data.
 // Coded and owned by: Hok Uy
-// Last Source Update: 27 May 2021
+// Last Source Update: 05 Feb 2023
 
 using System;
 using System.Xml.Serialization;
@@ -10,7 +10,7 @@ using System.Collections.Generic;
 namespace RagnarokInfo
 {
 	[XmlRoot(ElementName = "Character")]
-	public class Character
+	public class Character_Addr
 	{
 		[XmlElement(ElementName = "Name")]
 		public uint Name { get; set; }
@@ -29,7 +29,7 @@ namespace RagnarokInfo
 	}
 
 	[XmlRoot(ElementName = "Homunculus")]
-	public class Homunculus
+	public class Homunculus_Addr
 	{
 		[XmlElement(ElementName = "Name")]
 		public uint Name { get; set; }
@@ -46,7 +46,7 @@ namespace RagnarokInfo
 	}
 
 	[XmlRoot(ElementName = "Pet")]
-	public class Pet
+	public class Pet_Addr
 	{
 		[XmlElement(ElementName = "Name")]
 		public uint Name { get; set; }
@@ -64,11 +64,11 @@ namespace RagnarokInfo
 		[XmlElement(ElementName = "LoggedIn")]
 		public uint LoggedIn { get; set; }
 		[XmlElement(ElementName = "Character")]
-		public Character Character { get; set; }
+		public Character_Addr Character { get; set; }
 		[XmlElement(ElementName = "Homunculus")]
-		public Homunculus Homunculus { get; set; }
+		public Homunculus_Addr Homunculus { get; set; }
 		[XmlElement(ElementName = "Pet")]
-		public Pet Pet { get; set; }
+		public Pet_Addr Pet { get; set; }
 	}
 
 	[XmlRoot(ElementName = "ClientInfo")]

@@ -122,6 +122,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Character_Info.cs" />
+    <Compile Include="Calculator.cs" />
+    <Compile Include="Memory.cs" />
     <Compile Include="UserSettings.cs" />
     <Compile Include="ClientList.cs" />
     <Compile Include="PetInfo.xaml.cs">

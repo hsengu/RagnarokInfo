@@ -1,7 +1,7 @@
 ﻿// Project: PetInfo.xaml.cs
 // Description: Interaction logic for the PetInfo window of RagnarokInfo
 // Coded and owned by: Hok Uy
-// Last Source Update: 03 Feb 2023
+// Last Source Update: 06 Feb 2023
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -65,13 +65,8 @@ namespace RagnarokInfo
         private static IntPtr initProcess = MainWindow.getProcess;
         private static bool isLoggedIn = MainWindow.getLogged;
         private static ClientInfo client = MainWindow.mem;
-        private static String homu_name, pet_name;
-        private static int homu_loy = 0, pet_loy = 0,
-                           homu_hun = 0, pet_hun = 0,
-                           homu_exp = 0, homu_need = 0,
-                           homu_hun_init = 0, pet_hun_init = 0,
-                           homu_out = 0, pet_out = 0;
-        private static int homu_beep_when = 12, pet_beep_when = 76;
+        private static Homunculus homunculus = MainWindow.getHomunculus;
+        private static Pet pet = MainWindow.getPet;
         private static bool setBeepThresholdH = true, setBeepThresholdP = true;
         private static System.Windows.Threading.DispatcherTimer timer = new System.Windows.Threading.DispatcherTimer();
         private static Sound ding = new Sound();
@@ -111,7 +106,7 @@ namespace RagnarokInfo
                 setBeepH();
             }
 
-            if (pet_hun == 100 && setBeepThresholdP == false)
+            if (pet.Hunger == 100 && setBeepThresholdP == false)
             {
                 setBeepThresholdH = true;
                 setBeepP();
@@ -120,14 +115,14 @@ namespace RagnarokInfo
 
         private void Homu_HungerUpDown_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            homu_beep_when = (int)Homu_HungerUpDown.Value + 1;
+            homunculus.Beep = (int)Homu_HungerUpDown.Value + 1;
             setBeepThresholdH = true;
             setBeepH();
         }
 
         private void comboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            pet_beep_when = (comboBox.SelectedIndex == 0) ? 76 : 26;
+            pet.Beep = (comboBox.SelectedIndex == 0) ? 76 : 26;
             setBeepThresholdP = true;
             setBeepP();
         }
@@ -142,8 +137,8 @@ namespace RagnarokInfo
             byte[] hnBuff = new byte[24];
             byte[] hLoy = new byte[sizeof(int)];
             byte[] hHun = new byte[sizeof(int)];
-            byte[] hExp = new byte[sizeof(int)];
-            byte[] hExpNeed = new byte[sizeof(int)];
+            byte[] hExp = new byte[sizeof(long)];
+            byte[] hExpNeed = new byte[sizeof(long)];
             byte[] hOut = new byte[sizeof(int)];
             byte[] pnBuff = new byte[24];
             byte[] pLoy = new byte[sizeof(int)];
@@ -152,21 +147,21 @@ namespace RagnarokInfo
             int read = 0;
 
             readMem(hnBuff, hLoy, hHun, hExp, hExpNeed, hOut, pnBuff, pLoy, pHun, pOut, ref read);
-            homu_name = System.Text.Encoding.ASCII.GetString(hnBuff);
-            homu_loy = BitConverter.ToInt32(hLoy, 0);
-            homu_hun = BitConverter.ToInt32(hHun, 0);
-            homu_exp = BitConverter.ToInt32(hExp, 0);
-            homu_need = BitConverter.ToInt32(hExpNeed, 0);
-            homu_out = BitConverter.ToInt32(hOut, 0);
-            pet_name = System.Text.Encoding.ASCII.GetString(pnBuff);
-            pet_loy = BitConverter.ToInt32(pLoy, 0);
-            pet_hun = BitConverter.ToInt32(pHun, 0);
-            pet_out = BitConverter.ToInt32(pOut, 0);
+            homunculus.Name = System.Text.Encoding.ASCII.GetString(hnBuff);
+            homunculus.Loyalty = BitConverter.ToInt32(hLoy, 0);
+            homunculus.Hunger = BitConverter.ToInt32(hHun, 0);
+            homunculus.Exp = BitConverter.ToInt64(hExp, 0);
+            homunculus.Exp_Required = BitConverter.ToInt64(hExpNeed, 0);
+            homunculus.Out = BitConverter.ToInt32(hOut, 0);
+            pet.Name = System.Text.Encoding.ASCII.GetString(pnBuff);
+            pet.Loyalty = BitConverter.ToInt32(pLoy, 0);
+            pet.Hunger = BitConverter.ToInt32(pHun, 0);
+            pet.Out = BitConverter.ToInt32(pOut, 0);
 
-            read = homu_name.IndexOf('\0');
-            homu_name = homu_name.Substring(0, read).Replace("\t","");
-            read = pet_name.IndexOf('\0');
-            pet_name = pet_name.Substring(0, read).Replace("\t", "");
+            read = homunculus.Name.IndexOf('\0');
+            homunculus.Name = homunculus.Name.Substring(0, read).Replace("\t","");
+            read = pet.Name.IndexOf('\0');
+            pet.Name = pet.Name.Substring(0, read).Replace("\t", "");
 
             doBeep();
         }
@@ -203,7 +198,7 @@ namespace RagnarokInfo
                 clearPetOut = BitConverter.GetBytes(-1);
                 int r;
 
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) - 1596, clearPetOut, clearPetOut.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) - client.Offsets.Pet.Out, clearPetOut, clearPetOut.Length, out r);
             }
             catch (Exception e)
             {
@@ -224,32 +219,32 @@ namespace RagnarokInfo
                 char_name_initial = MainWindow.getCharName;
             }
 
-            if (homu_out != 0 && isLoggedIn)
+            if (homunculus.Out != 0 && isLoggedIn)
             {
-                Homu_Name.Content = homu_name.ToString();
-                label.Content = homu_hun.ToString() + " / 100";
-                label1.Content = homu_loy.ToString() + " / 1000";
-                label2.Content = (homu_need - homu_exp).ToString("N0");
+                Homu_Name.Content = homunculus.Name.ToString();
+                label.Content = homunculus.Hunger.ToString() + " / 100";
+                label1.Content = homunculus.Loyalty.ToString() + " / 1000";
+                label2.Content = (homunculus.Exp_Required - homunculus.Exp).ToString("N0");
 
-                if (homu_hun > 91)
+                if (homunculus.Hunger > 91)
                 {
                     Homu_Status.Content = "Stuffed";
                     Homu_Status.Foreground = System.Windows.Media.Brushes.LightPink;
                     label.Foreground = System.Windows.Media.Brushes.Red;
                 }
-                else if (homu_hun > 75)
+                else if (homunculus.Hunger > 75)
                 {
                     Homu_Status.Content = "Satisfied";
                     Homu_Status.Foreground = System.Windows.Media.Brushes.Orange;
                     label.Foreground = System.Windows.Media.Brushes.DarkOrange;
                 }
-                else if (homu_hun > 25)
+                else if (homunculus.Hunger > 25)
                 {
                     Homu_Status.Content = "Neutral";
                     Homu_Status.Foreground = System.Windows.Media.Brushes.LightSkyBlue;
                     label.Foreground = System.Windows.Media.Brushes.Blue;
                 }
-                else if (homu_hun > 10)
+                else if (homunculus.Hunger > 10)
                 {
                     Homu_Status.Content = "Hungry";
                     Homu_Status.Foreground = System.Windows.Media.Brushes.LightGreen;
@@ -274,31 +269,31 @@ namespace RagnarokInfo
                 resetHomun();
             }
 
-            if (pet_out != -1 && isLoggedIn)
+            if (pet.Out != -1 && isLoggedIn)
             {
-                Pet_Name.Content = pet_name.ToString();
-                label4.Content = pet_hun.ToString() + " / 100";
-                label5.Content = pet_loy.ToString() + " / 1000";
+                Pet_Name.Content = pet.Name.ToString();
+                label4.Content = pet.Hunger.ToString() + " / 100";
+                label5.Content = pet.Loyalty.ToString() + " / 1000";
 
-                if (pet_hun > 90)
+                if (pet.Hunger > 90)
                 {
                     Pet_Status.Content = "Stuffed";
                     Pet_Status.Foreground = System.Windows.Media.Brushes.LightGreen;
                     label4.Foreground = System.Windows.Media.Brushes.Green;
                 }
-                else if (pet_hun > 75)
+                else if (pet.Hunger > 75)
                 {
                     Pet_Status.Content = "Satisfied";
                     Pet_Status.Foreground = System.Windows.Media.Brushes.LightGreen;
                     label4.Foreground = System.Windows.Media.Brushes.Green;
                 }
-                else if (pet_hun > 25)
+                else if (pet.Hunger > 25)
                 {
                     Pet_Status.Content = "Neutral";
                     Pet_Status.Foreground = System.Windows.Media.Brushes.LightSkyBlue;
                     label4.Foreground = System.Windows.Media.Brushes.Blue;
                 }
-                else if (pet_hun > 10)
+                else if (pet.Hunger > 10)
                 {
                     Pet_Status.Content = "Hungry";
                     Pet_Status.Foreground = System.Windows.Media.Brushes.Orange;
@@ -325,13 +320,13 @@ namespace RagnarokInfo
 
         private void setBeepH()
         {
-            homu_hun_init = homu_beep_when;
+            homunculus.Hunger_Initial = homunculus.Beep;
             setBeepThresholdH = false;
         }
 
         private void setBeepP()
         {
-            pet_hun_init = pet_beep_when;
+            pet.Hunger_Initial = pet.Beep;
             setBeepThresholdP = false;
         }
 
@@ -339,20 +334,20 @@ namespace RagnarokInfo
         {
             if (this.IsVisible == true)
             {
-                if (homu_hun < homu_hun_init && homu_out != 0 && isLoggedIn)
+                if (homunculus.Hunger < homunculus.Hunger_Initial && homunculus.Out != 0 && isLoggedIn)
                 {
-                    homu_hun_init = homu_hun;
+                    homunculus.Hunger_Initial = homunculus.Hunger;
                     if (checkBox.IsChecked == false)
                         ding.Play();
                 }
-                else if (homu_hun >= homu_beep_when && homu_hun_init != homu_beep_when)
+                else if (homunculus.Hunger >= homunculus.Beep && homunculus.Hunger_Initial != homunculus.Beep)
                     setBeepThresholdH = true;
-                else if (homu_hun > homu_hun_init && homu_hun < homu_beep_when)
-                    homu_hun_init = homu_hun;
+                else if (homunculus.Hunger > homunculus.Hunger_Initial && homunculus.Hunger < homunculus.Beep)
+                    homunculus.Hunger_Initial = homunculus.Hunger;
 
-                if (pet_hun < pet_hun_init && pet_out != -1 && isLoggedIn)
+                if (pet.Hunger < pet.Hunger_Initial && pet.Out != -1 && isLoggedIn)
                 {
-                    pet_hun_init = pet_hun;
+                    pet.Hunger_Initial = pet.Hunger;
                     if (checkBox.IsChecked == false)
                         ding.Play();
                 }
@@ -361,18 +356,19 @@ namespace RagnarokInfo
 
         private void resetHomun()
         {
-            homu_name = "";
-            homu_loy = homu_hun = homu_hun_init = homu_exp = homu_need = homu_out = 0;
-            homu_beep_when = (int)Homu_HungerUpDown.Value + 1;
+            homunculus.Name = "";
+            homunculus.Loyalty = homunculus.Hunger = homunculus.Hunger_Initial = homunculus.Out = 0;
+            homunculus.Exp = homunculus.Exp_Required = 0;
+            homunculus.Beep = (int)Homu_HungerUpDown.Value + 1;
             setBeepThresholdH = true;
             setBeepH();
         }
 
         private void resetPet()
         {
-            pet_name = "";
-            pet_loy = pet_hun = pet_hun_init = pet_out = 0;
-            pet_beep_when = (comboBox.SelectedIndex == 0) ? 76 : 26;
+            pet.Name = "";
+            pet.Loyalty = pet.Hunger = pet.Hunger_Initial = pet.Out = 0;
+            pet.Beep = (comboBox.SelectedIndex == 0) ? 76 : 26;
             setBeepThresholdP = true;
             setBeepP();
         }
