@@ -207,6 +207,7 @@ namespace RagnarokInfo
         private void throwE(Exception e)
         {
             System.Windows.MessageBox.Show("Memory exception was thrown because:\n" + e.Message + "\nProgram will now terminate.");
+            MainWindow.killApp();
         }
     }
 }

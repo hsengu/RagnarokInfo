@@ -368,6 +368,11 @@ namespace RagnarokInfo
             mem.clearMem(client);
         }
 
+        public static void killApp()
+        {
+            Application.Current.Shutdown();
+        }
+
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
