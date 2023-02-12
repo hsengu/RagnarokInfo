@@ -64,7 +64,7 @@ namespace RagnarokInfo
         private static IntPtr whProcess = MainWindow.getWriteProcess;
         private static IntPtr initProcess = MainWindow.getProcess;
         private static bool isLoggedIn = MainWindow.getLogged;
-        private static ClientInfo client = MainWindow.mem;
+        private static ClientInfo client = MainWindow.getMem;
         private static Homunculus homunculus = MainWindow.getHomunculus;
         private static Pet pet = MainWindow.getPet;
         private static bool setBeepThresholdH = true, setBeepThresholdP = true;

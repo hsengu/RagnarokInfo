@@ -20,27 +20,9 @@ namespace RagnarokInfo
 
     public partial class MainWindow : Window
     {
-        #region Winapi
-        internal static class UnsafeNativeMethods
-        {
-            [DllImport("Kernel32.dll")]
-            public static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle,
-                                        int dwProcessId);
-
-            [DllImport("Kernel32.dll")]
-            public static extern bool ReadProcessMemory(IntPtr hProcess, uint lpBaseAddress, byte[] lpBuffer,
-                                                        int nSize, out int lpNumberOfBytesRead);
-
-            [DllImport("Kernel32.dll")]
-            public static extern bool WriteProcessMemory(IntPtr hProcess, uint lpBaseAddress, byte[] lpBuffer,
-                                                        int nSize, out int lpNumberOfBytesRead);
-        }
-        #endregion Winapi
-
         private static int clientSelect;
         private static Process[] ragList;
         private static ObservableCollection<string> Items = new ObservableCollection<string>();
-        private static IntPtr hProcess, whProcess;
         private static Character_Info character = new Character_Info();
         private static Stopwatch stopWatch = new Stopwatch();
         private static double elapsed = 0;
@@ -54,13 +36,17 @@ namespace RagnarokInfo
         private static RagnarokInfo.Settings settings;
         private static ClientInfo client;
         private static Calculator calc = new Calculator();
+        private static Memory mem = new Memory(ref ragList, 0, ref client);
 
         public MainWindow(int cSelect)
         {
             InitializeComponent();
             Char_Combo.ItemsSource = Items;
             clientSelect = cSelect;
+
             getProcesses();
+            mem.readMemoryAddresses(ref client);
+            makeList();
             ReadInfo(true);
             petInfo = new RagnarokInfo.PetInfo();
             settings = new RagnarokInfo.Settings();
@@ -93,13 +79,12 @@ namespace RagnarokInfo
             ClientSelect.gameStart();
         }
 
-        private void Char_Combo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        public void Char_Combo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             int index = Char_Combo.SelectedIndex;
             if (Char_Combo.HasItems == true)
             {
-                hProcess = UnsafeNativeMethods.OpenProcess(0x0010, false, ragList[Char_Combo.SelectedIndex].Id);
-                whProcess = UnsafeNativeMethods.OpenProcess(0x1F0FFF, false, ragList[Char_Combo.SelectedIndex].Id);
+                mem.processChange(ragList, Char_Combo.SelectedIndex);
                 ReadInfo(true);
                 Char_Combo.SelectionChanged -= Char_Combo_SelectionChanged;
                 Char_Combo.SelectedIndex = index;
@@ -132,39 +117,20 @@ namespace RagnarokInfo
                                                + "© 2023 Build: 20230203");
         }
 
-        private void ReadInfo(bool init)
+        public void ReadInfo(bool init)
         {
-            byte[] baseBuff = new byte[sizeof(long)];
-            byte[] jobBuff = new byte[sizeof(long)];
-            byte[] charName = new byte[24];
-            byte[] baseLvl = new byte[sizeof(int)];
-            byte[] jobLvl = new byte[sizeof(int)];
-            byte[] baseReq = new byte[sizeof(long)];
-            byte[] jobReq = new byte[sizeof(long)];
-            byte[] logged = new byte[sizeof(int)];
-            byte[] acct = new byte[sizeof(int)];
-            int read = 0;
+            object[] valuesArray = mem.ReadInfo(client);
 
-            readMem(baseBuff, jobBuff, charName, baseLvl, jobLvl, baseReq, jobReq, logged, acct, ref read);
-            String name = System.Text.Encoding.ASCII.GetString(charName).Trim('\0');
-            long value = BitConverter.ToInt64(baseBuff, 0);
-            long value_j = BitConverter.ToInt64(jobBuff, 0);
-            long bLvl = BitConverter.ToInt32(baseLvl, 0);
-            long jLvl = BitConverter.ToInt32(jobLvl, 0);
-            long bReq = BitConverter.ToInt64(baseReq, 0);
-            long jReq = BitConverter.ToInt64(jobReq, 0);
-            int account = BitConverter.ToInt32(acct, 0);
-            bool log = (BitConverter.ToInt32(logged, 0) > 0) ? true : false;
+            calc.setLevels(valuesArray);
 
             if (!init)
             {
-                character.Logged_In = log;
-                //calcExp(value, value_j, bLvl, jLvl, bReq, jReq, log, account, name);
-                calc.calcExp(character, stopWatch, ref elapsed, ref firstRun, ref refreshOnNextLog, ref startNew);
+                character.Logged_In = (bool)valuesArray[1];
+                calcExp(stopWatch, ref elapsed, ref firstRun, ref refreshOnNextLog, ref startNew);
             }
             else
             {
-                resetValues(value, value_j, bLvl, jLvl, bReq, jReq, log, account, name);
+                resetValues(valuesArray);
                 getProcesses();
             }
         }
@@ -242,30 +208,24 @@ namespace RagnarokInfo
                 checkBox.IsChecked = false;
         }
 
-/*        private void calcExp(long b_current, long j_current, long b_lvl_curr, long j_lvl_curr, long b_req, long j_req, bool log, int account, String name)
+        public void calcExp(Stopwatch stopWatch, ref double elapsed, ref bool firstRun, ref bool refreshOnNextLog, ref bool startNew)
         {
-            bool bLeveled = false, jLeveled = false;
-            character.Base.actual = b_current;
-            character.Job.actual = j_current;
-            character.Base.remaining = b_req - b_current;
-            character.Job.remaining = j_req - j_current;
-            character.Base.percent = ((double)character.Base.actual / b_req) * 100;
-            character.Job.percent = ((double)character.Job.actual / j_req) * 100;
+            calc.setCharacterValues(ref character, calc);
 
-            if (log == false && account != character.Account)
+            if (character.Logged_In == false && calc.account != character.Account)
             {
-                clearMem();
+                mem.clearMem(client);
                 ReadInfo(true);
                 return;
             }
-            else if (log == false)
+            else if (character.Logged_In == false)
             {
-                if (name == character.Name && name != "")
+                if (calc.name == character.Name && calc.name != "")
                 {
                     stopWatch.Stop();
                     return;
                 }
-                else if (name == "")
+                else if (calc.name == "")
                     firstRun = true;
                 refreshOnNextLog = true;
                 ReadInfo(true);
@@ -287,8 +247,8 @@ namespace RagnarokInfo
             else if (character.Base.gained > 0 || character.Job.gained > 0)
                 stopWatch.Start();
 
-            checkLeveled(ref b_current, ref b_lvl_curr, ref b_req, ref bLeveled, character.Base);
-            checkLeveled(ref j_current, ref j_lvl_curr, ref j_req, ref jLeveled, character.Job);
+            calc.checkLeveled(character.Base, calc.base_level);
+            calc.checkLeveled(character.Job, calc.job_level);
 
             if (character.Base.gained != 0 || character.Job.gained != 0)
             {
@@ -301,162 +261,34 @@ namespace RagnarokInfo
             else
                 return;
 
-            double elapsedMilliseconds = Math.Max(0, stopWatch.ElapsedMilliseconds);
-            elapsed = 3600000.0 / elapsedMilliseconds;
-            character.Base.hour = character.Base.gained * elapsed;
-            character.Job.hour = character.Job.gained * elapsed;
-            character.Base.level_required = b_req;
-            character.Job.level_required = j_req;
-        }*/
+            calc.time(character.Base, stopWatch, elapsed);
+            calc.time(character.Job, stopWatch, elapsed);
+        }
 
-        private void resetValues(long b_current, long j_current, long b_lvl_curr, long j_lvl_curr, long b_req, long j_req, bool log, int account, String name)
+        private void resetValues(object[] valuesArray)
         {
             startNew = true;
             stopWatch.Reset();
-            character.set(b_current, j_current, b_lvl_curr, j_lvl_curr, b_req, j_req, log, account, name);
+            character.set(valuesArray);
             elapsed = 0;
-        }
-
-        private void readMem(byte[] bBuff, byte[] jBuff, byte[] nBuff, byte[] bLvl, byte[] jLvl, byte[] bReq, byte[] jReq, byte[] logged, byte[] acct, ref int r)
-        {
-            try
-            {
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16), acct, acct.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.Name, nBuff, nBuff.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.LoggedIn, logged, logged.Length, out r);
-
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseLevel, bLvl, bLvl.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseExp, bBuff, bBuff.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseExpRequired, bReq, bReq.Length, out r);
-
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobLevel, jLvl, jLvl.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobExp, jBuff, jBuff.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobExpRequired, jReq, jReq.Length, out r);
-            }
-            catch(Exception e) {
-                System.Windows.MessageBox.Show("An exception was thrown because:\n" + e.Message + "\nProgram will now terminate.");
-                Application.Current.Shutdown();
-            }
-        }
-
-        private void clearMem()
-        {
-            byte[] clear = new byte[sizeof(int)];
-            byte[] clear_string = new byte[24];
-            int r;
-
-            try
-            {
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.Name, clear_string, clear_string.Length, out r);
-
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseLevel, clear, clear.Length, out r);
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseExp, clear, clear.Length, out r);
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseExpRequired, clear, clear.Length, out r);
-
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobLevel, clear, clear.Length, out r);
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobExp, clear, clear.Length, out r);
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobExpRequired, clear, clear.Length, out r);
-            }
-            catch(Exception e) {
-                System.Windows.MessageBox.Show("An exception was thrown because:\n" + e.Message + "\nProgram will now terminate.");
-                Application.Current.Shutdown();
-            }
         }
 
         private void makeList()
         {
-            byte[] charName = new byte[24];
-            int read = 0, newIndex = 0;
-            IntPtr tempProcess = hProcess;
-
+            int newIndex = 0;
             Char_Combo.SelectionChanged -= Char_Combo_SelectionChanged;
             Items.Clear();
-            try
-            {
-                for (int i = 0; i < ragList.Length; i++)
-                {
-                    hProcess = UnsafeNativeMethods.OpenProcess(0x0010, false, ragList[i].Id);
-                    UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.Name, charName, charName.Length, out read);
-                    Items.Add(System.Text.Encoding.ASCII.GetString(charName).Trim('\0'));
-                    if (Items[i].ToString() == character.Name)
-                        newIndex = i;
-                }
-            }
-            catch (Exception e)
-            {
-                System.Windows.MessageBox.Show("An exception was thrown because:\n" + e.Message + "\nProgram will now terminate.");
-                Application.Current.Shutdown();
-            }
+            newIndex = mem.listHelper(ref ragList, client, character, Items);
 
             try { Char_Combo.SelectedIndex = newIndex; Char_Combo.SelectionChanged += Char_Combo_SelectionChanged; }
             catch (Exception e)
             { Char_Combo.SelectedIndex = 0; }
-            finally { hProcess = tempProcess; }
         }
 
         private void getProcesses()
         {
-            IntPtr tempProcess, tempWProcess;
-
-            try
-            {
-                readMemoryAddresses();
-                ragList = Process.GetProcessesByName("ragexe");
-            }
-            catch (Exception e)
-            {
-                System.Windows.MessageBox.Show("An exception was thrown because:\n" + e.Message +
-                                               "\nProgram will now terminate.");
-                Application.Current.Shutdown();
-            }
-            
-
-            if (firstRun)
-            {
-                try
-                {
-                    hProcess = UnsafeNativeMethods.OpenProcess(0x0010, false, ragList[0].Id);
-                    whProcess = UnsafeNativeMethods.OpenProcess(0x1F0FFF, false, ragList[0].Id);
-                    firstRun = false;
-                    makeList();
-                }
-                catch (Exception e)
-                {
-                    System.Windows.MessageBox.Show("An exception was thrown because:\n" + e.Message + "\nProgram will now terminate.");
-                    Application.Current.Shutdown();
-                }
-            }
-            else
-            {
-                try
-                {
-                    tempProcess = UnsafeNativeMethods.OpenProcess(0x0010, false, ragList[0].Id);
-                    tempWProcess = UnsafeNativeMethods.OpenProcess(0x1F0FFF, false, ragList[0].Id);
-                    makeList();
-                }
-                catch (Exception e)
-                {
-                    System.Windows.MessageBox.Show("An exception was thrown because:\n" + e.Message + "\nProgram will now terminate.");
-                    Application.Current.Shutdown();
-                }
-            }
-        }
-
-        private void readMemoryAddresses()
-        {
-            try
-            {
-                using (TextReader reader = new StreamReader(Directory.GetCurrentDirectory() + "\\AddressList.xml"))
-                {
-                    XmlSerializer serializer = new XmlSerializer(typeof(ClientList));
-                    client = ((ClientList)serializer.Deserialize(reader)).Client;
-                }
-            }
-            catch (Exception e)
-            {
-                System.Windows.MessageBox.Show(e.Message);
-                Application.Current.Shutdown();
-            }
+            mem.getProcesses(firstRun, ref ragList, ref client);
+            makeList();
         }
 
         private String getTime()
@@ -470,36 +302,14 @@ namespace RagnarokInfo
             return time;
         }
 
-/*        private void checkLeveled(ref long current, ref long level_current, ref long exp_required, ref bool leveled, Character_Info.Exp_template exp)
-        {
-            if (level_current == (exp.level_initial + 1))
-            {
-                exp.gained += (exp.remaining - exp.initial - exp.gained + exp.previous_gained + current);
-                exp.previous_value = exp.initial = current;
-                exp.level_initial = level_current;
-                exp.remaining = exp_required;
-                leveled = true;
-            }
-
-            if (!leveled && (current - exp.previous_value) != 0)
-            {
-                exp.gained += current - exp.previous_value;
-                exp.previous_value = current;
-            }
-            else if (leveled)
-            {
-                exp.previous_gained = exp.gained;
-            }
-        }*/
-
         public static IntPtr getProcess
         {
-            get { return hProcess; }
+            get { return mem.hProcess; }
         }
 
         public static IntPtr getWriteProcess
         {
-            get { return whProcess; }
+            get { return mem.whProcess; }
         }
         public static String getCharName
         {
@@ -532,7 +342,7 @@ namespace RagnarokInfo
             set { rightOpacityOffset = value; }
         }
 
-        public static ClientInfo mem
+        public static ClientInfo getMem
         {
             get { return client; }
         }
@@ -551,6 +361,11 @@ namespace RagnarokInfo
         public static Pet getPet
         {
             get { return character.pet; }
+        }
+
+        public static void callClear()
+        {
+            mem.clearMem(client);
         }
 
         protected override void OnClosed(EventArgs e)

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Controls;
 using System.Xml.Serialization;
 
 namespace RagnarokInfo
@@ -28,23 +30,28 @@ namespace RagnarokInfo
         }
         #endregion Winapi
 
-        private static IntPtr hProcess { get; set; }
-        private static IntPtr whProcess { get; set; }
+        public IntPtr hProcess { get; set; }
+        public IntPtr whProcess { get; set; }
 
-        public Memory(Process[] ragList)
+        public Memory(ref Process[] list, int i, ref ClientInfo client)
         {
-            hProcess = UnsafeNativeMethods.OpenProcess(0x0010, false, ragList[Char_Combo.SelectedIndex].Id);
-            whProcess = UnsafeNativeMethods.OpenProcess(0x1F0FFF, false, ragList[Char_Combo.SelectedIndex].Id);
+            getProcesses(true, ref list, ref client);
+            hProcess = UnsafeNativeMethods.OpenProcess(0x0010, false, list[i].Id);
+            whProcess = UnsafeNativeMethods.OpenProcess(0x1F0FFF, false, list[i].Id);
         }
 
-        private void getProcesses()
+        public void processChange(Process[] list, int i)
         {
-            IntPtr tempProcess, tempWProcess;
+            hProcess = UnsafeNativeMethods.OpenProcess(0x0010, false, list[i].Id);
+            whProcess = UnsafeNativeMethods.OpenProcess(0x1F0FFF, false, list[i].Id);
+        }
 
+        public void getProcesses(bool firstRun, ref Process[] list, ref ClientInfo client)
+        {
             try
             {
-                readMemoryAddresses();
-                ragList = Process.GetProcessesByName("ragexe");
+                readMemoryAddresses(ref client);
+                list = Process.GetProcessesByName("ragexe");
             }
             catch (Exception e)
             {
@@ -55,10 +62,8 @@ namespace RagnarokInfo
             {
                 try
                 {
-                    hProcess = UnsafeNativeMethods.OpenProcess(0x0010, false, ragList[0].Id);
-                    whProcess = UnsafeNativeMethods.OpenProcess(0x1F0FFF, false, ragList[0].Id);
+                    processChange(list, 0);
                     firstRun = false;
-                    makeList();
                 }
                 catch (Exception e)
                 {
@@ -69,32 +74,29 @@ namespace RagnarokInfo
             {
                 try
                 {
-                    tempProcess = UnsafeNativeMethods.OpenProcess(0x0010, false, ragList[0].Id);
-                    tempWProcess = UnsafeNativeMethods.OpenProcess(0x1F0FFF, false, ragList[0].Id);
-                    makeList();
+                    processChange(list, 0);
                 }
                 catch (Exception e)
                 {
-                    System.Windows.MessageBox.Show("An exception was thrown because:\n" + e.Message + "\nProgram will now terminate.");
-                    Application.Current.Shutdown();
+                    throwE(e);
                 }
             }
         }
 
-        private void readMem(byte[] bBuff, byte[] jBuff, byte[] nBuff, byte[] bLvl, byte[] jLvl, byte[] bReq, byte[] jReq, byte[] logged, byte[] acct, ref int r)
+        private void readMem(ClientInfo client, byte[] bBuff, byte[] jBuff, byte[] nBuff, byte[] bLvl, byte[] jLvl, byte[] bReq, byte[] jReq, byte[] logged, byte[] acct, ref int r)
         {
             try
             {
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16), acct, acct.Length, out r);
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.Name, nBuff, nBuff.Length, out r);
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.LoggedIn, logged, logged.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.Name, nBuff, nBuff.Length, out r);
 
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseLevel, bLvl, bLvl.Length, out r);
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseExp, bBuff, bBuff.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseLevel, bLvl, bLvl.Length, out r);
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseExpRequired, bReq, bReq.Length, out r);
 
-                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobLevel, jLvl, jLvl.Length, out r);
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobExp, jBuff, jBuff.Length, out r);
+                UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobLevel, jLvl, jLvl.Length, out r);
                 UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobExpRequired, jReq, jReq.Length, out r);
             }
             catch (Exception e)
@@ -103,7 +105,7 @@ namespace RagnarokInfo
             }
         }
 
-        private void clearMem()
+        public void clearMem(ClientInfo client)
         {
             byte[] clear = new byte[sizeof(int)];
             byte[] clear_string = new byte[24];
@@ -113,12 +115,12 @@ namespace RagnarokInfo
             {
                 UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.Name, clear_string, clear_string.Length, out r);
 
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseLevel, clear, clear.Length, out r);
                 UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseExp, clear, clear.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseLevel, clear, clear.Length, out r);
                 UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.BaseExpRequired, clear, clear.Length, out r);
 
-                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobLevel, clear, clear.Length, out r);
                 UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobExp, clear, clear.Length, out r);
+                UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobLevel, clear, clear.Length, out r);
                 UnsafeNativeMethods.WriteProcessMemory(whProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.JobExpRequired, clear, clear.Length, out r);
             }
             catch (Exception e)
@@ -127,18 +129,14 @@ namespace RagnarokInfo
             }
         }
 
-        private void readMemoryAddresses()
+        public void readMemoryAddresses(ref ClientInfo client)
         {
             try
             {
                 using (TextReader reader = new StreamReader(Directory.GetCurrentDirectory() + "\\AddressList.xml"))
                 {
                     XmlSerializer serializer = new XmlSerializer(typeof(ClientList));
-                    // Set event handlers for unknown nodes/attributes
-                    serializer.UnknownNode += new XmlNodeEventHandler(serializer_UnknownNode);
-                    serializer.UnknownAttribute += new XmlAttributeEventHandler(serializer_UnknownAttribute);
                     client = ((ClientList)serializer.Deserialize(reader)).Client;
-                    /*account = memAddr;*/
                 }
             }
             catch (Exception e)
@@ -147,41 +145,63 @@ namespace RagnarokInfo
             }
         }
 
-        private void ReadInfo(bool init)
+        public object[] ReadInfo(ClientInfo client)
         {
-            byte[] baseBuff = new byte[sizeof(long)];
-            byte[] jobBuff = new byte[sizeof(long)];
-            byte[] charName = new byte[24];
-            byte[] baseLvl = new byte[sizeof(int)];
-            byte[] jobLvl = new byte[sizeof(int)];
-            byte[] baseReq = new byte[sizeof(long)];
-            byte[] jobReq = new byte[sizeof(long)];
-            byte[] logged = new byte[sizeof(int)];
             byte[] acct = new byte[sizeof(int)];
+            byte[] logged = new byte[sizeof(int)];
+            byte[] charName = new byte[24];
+            byte[] baseBuff = new byte[sizeof(long)];
+            byte[] baseLvl = new byte[sizeof(int)];
+            byte[] baseReq = new byte[sizeof(long)];
+            byte[] jobBuff = new byte[sizeof(long)];
+            byte[] jobLvl = new byte[sizeof(int)];
+            byte[] jobReq = new byte[sizeof(long)];
             int read = 0;
 
-            readMem(baseBuff, jobBuff, charName, baseLvl, jobLvl, baseReq, jobReq, logged, acct, ref read);
-            String name = System.Text.Encoding.ASCII.GetString(charName).Trim('\0');
-            long value = BitConverter.ToInt64(baseBuff, 0);
-            long value_j = BitConverter.ToInt64(jobBuff, 0);
-            long bLvl = BitConverter.ToInt32(baseLvl, 0);
-            long jLvl = BitConverter.ToInt32(jobLvl, 0);
-            long bReq = BitConverter.ToInt64(baseReq, 0);
-            long jReq = BitConverter.ToInt64(jobReq, 0);
-            int account = BitConverter.ToInt32(acct, 0);
-            bool log = (BitConverter.ToInt32(logged, 0) > 0) ? true : false;
+            readMem(client, baseBuff, jobBuff, charName, baseLvl, jobLvl, baseReq, jobReq, logged, acct, ref read);
 
-            if (!init)
+            int account = BitConverter.ToInt32(acct, 0);
+            bool logged_in = (BitConverter.ToInt32(logged, 0) > 0) ? true : false;
+            String name = System.Text.Encoding.ASCII.GetString(charName).Trim('\0');
+            long base_exp = BitConverter.ToInt64(baseBuff, 0);
+            int base_Lvl = BitConverter.ToInt32(baseLvl, 0);
+            long base_required = BitConverter.ToInt64(baseReq, 0);
+            long job_exp = BitConverter.ToInt64(jobBuff, 0);
+            int job_Lvl = BitConverter.ToInt32(jobLvl, 0);
+            long job_required = BitConverter.ToInt64(jobReq, 0);
+
+            object[] objArray = new object[] { account, logged_in, name, base_exp, base_Lvl, base_required, job_exp, job_Lvl, job_required };
+
+            return objArray;
+        }
+
+        public int listHelper(ref Process[] list, ClientInfo client, Character_Info character, ObservableCollection<string> Items)
+        {
+            byte[] charName = new byte[24];
+            int read = 0, newIndex = 0;
+            IntPtr tempProcess = hProcess;
+
+            try
             {
-                character.Logged_In = log;
-                //calcExp(value, value_j, bLvl, jLvl, bReq, jReq, log, account, name);
-                calc.calcExp(character, stopWatch, ref elapsed, ref firstRun, ref refreshOnNextLog, ref startNew);
+                for (int i = 0; i < list.Length; i++)
+                {
+                    hProcess = UnsafeNativeMethods.OpenProcess(0x0010, false, list[i].Id);
+                    UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(client.Account, 16) + client.Offsets.Character.Name, charName, charName.Length, out read);
+                    Items.Add(System.Text.Encoding.ASCII.GetString(charName).Trim('\0'));
+                    if (Items[i].ToString() == character.Name)
+                        newIndex = i;
+                }
             }
-            else
+            catch (Exception e)
             {
-                resetValues(value, value_j, bLvl, jLvl, bReq, jReq, log, account, name);
-                getProcesses();
+                throwE(e);
             }
+            finally
+            {
+                hProcess = tempProcess;
+            }
+
+            return newIndex;
         }
 
         private void throwE(Exception e)

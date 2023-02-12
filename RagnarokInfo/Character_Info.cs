@@ -11,7 +11,7 @@ namespace RagnarokInfo
         public long actual { get; set; }
         public long initial { get; set; }
         public long gained { get; set; }
-        public long level_initial { get; set; }
+        public int level_initial { get; set; }
         public long level_required { get; set; }
         public long previous_value { get; set; }
         public long previous_gained { get; set; }
@@ -104,21 +104,21 @@ namespace RagnarokInfo
             pet = new Pet(76);
         }
 
-        public void set(long b_current, long j_current, long b_lvl_curr, long j_lvl_curr, long b_req, long j_req, bool log, int account, String name)
+        public void set(object[] valuesArray)
         {
-            Account = account;
-            Name = name;
-            Logged_In = log;
+            Account = (int)valuesArray[0];
+            Logged_In = (bool)valuesArray[1];
+            Name = (string)valuesArray[2];
 
-            Base.actual = Base.initial = b_current;
-            Base.level_initial = b_lvl_curr;
-            Base.remaining = b_req - Base.actual;
+            Base.actual = Base.initial = (long)valuesArray[3];
+            Base.level_initial = (int)valuesArray[4];
+            Base.remaining = (long)valuesArray[5] - (long)valuesArray[3];
             Base.previous_value = Base.previous_gained = Base.gained = 0;
             Base.percent = Base.hour = 0;
 
-            Job.actual = Job.initial = j_current;
-            Job.level_initial = j_lvl_curr;
-            Job.remaining = j_req - Job.actual;
+            Job.actual = Job.initial = (long)valuesArray[6];
+            Job.level_initial = (int)valuesArray[7];
+            Job.remaining = (long)valuesArray[8] - (long)valuesArray[6];
             Job.previous_value = Job.previous_gained = Job.gained = 0;
             Job.percent = Job.hour = 0;
         }

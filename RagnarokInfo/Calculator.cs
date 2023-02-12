@@ -8,7 +8,7 @@ namespace RagnarokInfo
         public class Level
         {
             public long current { get; set; }
-            public long current_level { get; set; }
+            public int current_level { get; set; }
             public long required { get; set; }
             public bool leveled { get; set; }
 
@@ -21,11 +21,11 @@ namespace RagnarokInfo
             }
         }
 
-        public static bool logged { get; set; }
-        public static int account { get; set; }
-        public static String name { get; set; }
-        public static Level base_level;
-        public static Level job_level;
+        public bool logged { get; set; }
+        public int account { get; set; }
+        public String name { get; set; }
+        public Level base_level { get; set; }
+        public Level job_level { get; set; }
 
         public Calculator()
         {
@@ -35,73 +35,25 @@ namespace RagnarokInfo
             job_level = new Level();
         }
 
-        public static void setCharacterValues(Exp_template character_level_type, Level l)
+        public void setCharacterValues(ref Character_Info character, Calculator calc)
         {
-            character_level_type.actual = l.current;
-            character_level_type.remaining = l.required - l.current;
-            character_level_type.percent = ((double)character_level_type.actual / l.required) * 100;
+            calc.base_level.leveled = false;
+            character.Base.actual = calc.base_level.current;
+            character.Base.remaining = calc.base_level.required - calc.base_level.current;
+            character.Base.percent = ((double)character.Base.actual / calc.base_level.required) * 100;
+
+            calc.job_level.leveled = false;
+            character.Job.actual = calc.job_level.current;
+            character.Job.remaining = calc.job_level.required - calc.job_level.current;
+            character.Job.percent = ((double)character.Job.actual / calc.job_level.required) * 100;
         }
 
-        public void calcExp(Character_Info character, Stopwatch stopWatch, ref double elapsed, ref bool firstRun, ref bool refreshOnNextLog, ref bool startNew)
+        public void time(Exp_template exp, Stopwatch stopWatch, double elapsed)
         {
-            setCharacterValues(character.Base, base_level);
-            setCharacterValues(character.Job, job_level);
-
-            if (logged == false && account != character.Account)
-            {
-                clearMem();
-                ReadInfo(true);
-                return;
-            }
-            else if (logged == false)
-            {
-                if (name == character.Name && name != "")
-                {
-                    stopWatch.Stop();
-                    return;
-                }
-                else if (name == "")
-                    firstRun = true;
-                refreshOnNextLog = true;
-                ReadInfo(true);
-                return;
-            }
-
-            if (startNew)
-            {
-                character.Base.previous_value = character.Base.initial;
-                character.Job.previous_value = character.Job.initial;
-                startNew = false;
-            }
-            else if (refreshOnNextLog)
-            {
-                ReadInfo(true);
-                refreshOnNextLog = false;
-                return;
-            }
-            else if (character.Base.gained > 0 || character.Job.gained > 0)
-                stopWatch.Start();
-
-            checkLeveled(character.Base, base_level);
-            checkLeveled(character.Job, job_level);
-
-            if (character.Base.gained != 0 || character.Job.gained != 0)
-            {
-                if (stopWatch.ElapsedMilliseconds == 0)
-                {
-                    stopWatch.Start();
-                    System.Threading.Thread.Sleep(1);
-                }
-            }
-            else
-                return;
-
             double elapsedMilliseconds = Math.Max(0, stopWatch.ElapsedMilliseconds);
             elapsed = 3600000.0 / elapsedMilliseconds;
-            character.Base.hour = character.Base.gained * elapsed;
-            character.Job.hour = character.Job.gained * elapsed;
-            character.Base.level_required = base_level.required;
-            character.Job.level_required = job_level.required;
+            exp.hour = exp.gained * elapsed;
+            exp.level_required = base_level.required;
         }
 
         public void checkLeveled(Exp_template exp, Level l)
@@ -124,6 +76,21 @@ namespace RagnarokInfo
             {
                 exp.previous_gained = exp.gained;
             }
+        }
+
+        public void setLevels(object[] values)
+        {
+            account = (int)values[0];
+            logged = (bool)values[1];
+            name = (String)values[2];
+
+            base_level.current = (long)values[3];
+            base_level.current_level = (int)values[4];
+            base_level.required = (long)values[5];
+
+            job_level.current = (long)values[6];
+            job_level.current_level = (int)values[7];
+            job_level.required = (long)values[8];
         }
     }
 }
