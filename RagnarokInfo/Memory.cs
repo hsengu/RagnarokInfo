@@ -33,20 +33,20 @@ namespace RagnarokInfo
         public IntPtr hProcess { get; set; }
         public IntPtr whProcess { get; set; }
 
-        public Memory(ref Process[] list, int i, ref ClientInfo client)
+        public Memory(ref bool firstRun, ref Process[] list, int i, ref ClientInfo client)
         {
-            getProcesses(true, ref list, ref client);
+            getProcesses(ref firstRun, ref list, ref i, ref client);
+        }
+
+        public void processChange(ref Process[] list, ref int i)
+        {
+            if (i >= list.Length)
+                i = 0;
             hProcess = UnsafeNativeMethods.OpenProcess(0x0010, false, list[i].Id);
             whProcess = UnsafeNativeMethods.OpenProcess(0x1F0FFF, false, list[i].Id);
         }
 
-        public void processChange(Process[] list, int i)
-        {
-            hProcess = UnsafeNativeMethods.OpenProcess(0x0010, false, list[i].Id);
-            whProcess = UnsafeNativeMethods.OpenProcess(0x1F0FFF, false, list[i].Id);
-        }
-
-        public void getProcesses(bool firstRun, ref Process[] list, ref ClientInfo client)
+        public void getProcesses(ref bool firstRun, ref Process[] list, ref int i, ref ClientInfo client)
         {
             try
             {
@@ -62,11 +62,12 @@ namespace RagnarokInfo
             {
                 try
                 {
-                    processChange(list, 0);
+                    processChange(ref list, ref i);
                     firstRun = false;
                 }
                 catch (Exception e)
                 {
+                    System.Windows.MessageBox.Show("Process change failed. Debug code: 001");
                     throwE(e);
                 }
             }
@@ -74,10 +75,11 @@ namespace RagnarokInfo
             {
                 try
                 {
-                    processChange(list, 0);
+                    processChange(ref list, ref i);
                 }
                 catch (Exception e)
                 {
+                    System.Windows.MessageBox.Show("Process change failed. Debug code: 002");
                     throwE(e);
                 }
             }

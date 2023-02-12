@@ -36,7 +36,7 @@ namespace RagnarokInfo
         private static RagnarokInfo.Settings settings;
         private static ClientInfo client;
         private static Calculator calc = new Calculator();
-        private static Memory mem = new Memory(ref ragList, 0, ref client);
+        private static Memory mem = new Memory(ref firstRun, ref ragList, 0, ref client);
 
         public MainWindow(int cSelect)
         {
@@ -46,7 +46,6 @@ namespace RagnarokInfo
 
             getProcesses();
             mem.readMemoryAddresses(ref client);
-            makeList();
             ReadInfo(true);
             petInfo = new RagnarokInfo.PetInfo();
             settings = new RagnarokInfo.Settings();
@@ -84,7 +83,7 @@ namespace RagnarokInfo
             int index = Char_Combo.SelectedIndex;
             if (Char_Combo.HasItems == true)
             {
-                mem.processChange(ragList, Char_Combo.SelectedIndex);
+                mem.processChange(ref ragList, ref index);
                 ReadInfo(true);
                 Char_Combo.SelectionChanged -= Char_Combo_SelectionChanged;
                 Char_Combo.SelectedIndex = index;
@@ -100,6 +99,7 @@ namespace RagnarokInfo
         private void listUpdate_Tick(object sender, EventArgs e)
         {
             getProcesses();
+            makeList();
         }
 
         private void dispatcherTimer_Tick(object sender, EventArgs e)
@@ -132,6 +132,7 @@ namespace RagnarokInfo
             {
                 resetValues(valuesArray);
                 getProcesses();
+                makeList();
             }
         }
 
@@ -278,17 +279,19 @@ namespace RagnarokInfo
             int newIndex = 0;
             Char_Combo.SelectionChanged -= Char_Combo_SelectionChanged;
             Items.Clear();
+            IntPtr tempProcess = mem.hProcess;
             newIndex = mem.listHelper(ref ragList, client, character, Items);
 
             try { Char_Combo.SelectedIndex = newIndex; Char_Combo.SelectionChanged += Char_Combo_SelectionChanged; }
             catch (Exception e)
             { Char_Combo.SelectedIndex = 0; }
+            finally { mem.hProcess = tempProcess; }
         }
 
         private void getProcesses()
         {
-            mem.getProcesses(firstRun, ref ragList, ref client);
-            makeList();
+            int index = Char_Combo.SelectedIndex < 0 ? 0 : Char_Combo.SelectedIndex;
+            mem.getProcesses(ref firstRun, ref ragList, ref index, ref client);
         }
 
         private String getTime()
