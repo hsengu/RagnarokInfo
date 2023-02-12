@@ -45,7 +45,7 @@ namespace RagnarokInfo
         private static IntPtr hProcess, whProcess;
         private static String name_initial;
 
-        private static ulong b_actual = 0,
+        private static long b_actual = 0,
             j_actual = 0,
             b_initial = 0,
             j_initial = 0,
@@ -241,12 +241,12 @@ namespace RagnarokInfo
 
             readMem(baseBuff, jobBuff, charName, baseLvl, jobLvl, baseReq, jobReq, logged, acct, ref read);
             String name = System.Text.Encoding.ASCII.GetString(charName).Trim('\0');
-            ulong value = BitConverter.ToUInt64(baseBuff, 0);
-            ulong value_j = BitConverter.ToUInt64(jobBuff, 0);
-            ulong bLvl = BitConverter.ToUInt32(baseLvl, 0);
-            ulong jLvl = BitConverter.ToUInt32(jobLvl, 0);
-            ulong bReq = BitConverter.ToUInt64(baseReq, 0);
-            ulong jReq = BitConverter.ToUInt64(jobReq, 0);
+            long value = BitConverter.ToInt64(baseBuff, 0);
+            long value_j = BitConverter.ToInt64(jobBuff, 0);
+            long bLvl = BitConverter.ToInt32(baseLvl, 0);
+            long jLvl = BitConverter.ToInt32(jobLvl, 0);
+            long bReq = BitConverter.ToInt64(baseReq, 0);
+            long jReq = BitConverter.ToInt64(jobReq, 0);
             int account = BitConverter.ToInt32(acct, 0);
             bool log = (BitConverter.ToInt32(logged, 0) > 0) ? true : false;
 
@@ -262,7 +262,7 @@ namespace RagnarokInfo
             }
         }
 
-        private void calcExp(ulong b_current, ulong j_current, ulong b_lvl_curr, ulong j_lvl_curr, ulong b_req, ulong j_req, bool log, int account, String name)
+        private void calcExp(long b_current, long j_current, long b_lvl_curr, long j_lvl_curr, long b_req, long j_req, bool log, int account, String name)
         {
             bool bLeveled = false, jLeveled = false;
             b_actual = b_current;
@@ -360,7 +360,7 @@ namespace RagnarokInfo
             j_lvl_req = j_req;
         }
 
-        private void resetValues(ulong b_current, ulong j_current, ulong b_lvl_curr, ulong j_lvl_curr, ulong b_req, ulong j_req, bool log, int account, String name)
+        private void resetValues(long b_current, long j_current, long b_lvl_curr, long j_lvl_curr, long b_req, long j_req, bool log, int account, String name)
         {
             startNew = true;
             stopWatch.Reset();
@@ -438,7 +438,7 @@ namespace RagnarokInfo
                 for (int i = 0; i < ragList.Length; i++)
                 {
                     hProcess = UnsafeNativeMethods.OpenProcess(0x0010, false, ragList[i].Id);
-                    UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 23264, charName, charName.Length, out read);
+                    UnsafeNativeMethods.ReadProcessMemory(hProcess, Convert.ToUInt32(memAddr.clientList[clientSelect].Account, 16) + 23268, charName, charName.Length, out read);
                     Items.Add(System.Text.Encoding.ASCII.GetString(charName).Trim('\0'));
                     if (Items[i].ToString() == name_initial)
                         newIndex = i;
